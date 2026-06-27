@@ -1,0 +1,13 @@
+{
+  "name": "aiguard-knowledge",
+  "version": "1.0.0",
+  "category": "Education · AI-Guard Project Knowledge Assistant",
+  "description": "智守AI-Guard教学项目全功能知识助手：提供技术栈文档检索、硬件规格查询、故障排查引导、敏捷开发支持。当学生在AI-Guard项目开发中遇到问题、需要查找文档、排查故障或了解硬件规格时调用。",
+  "homepage": "Gitee repository URL to be added",
+  "compat": [
+    "trae",
+    "claude-code",
+    "cursor",
+    "codex-cli"
+  ]
+}

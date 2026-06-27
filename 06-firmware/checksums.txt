@@ -1,0 +1,2 @@
+22128ac89dbc10d089fcc80f7e06bfd483fa54cd8de840955aa2ef06bd8e408e  v2.2.4_waveshare-esp32-p4-wifi6-touch-lcd-7b.zip
+b617e21c13cf54d3469fc530459296ac2868f64fe2de33bc7bc087c15847960e  v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip
