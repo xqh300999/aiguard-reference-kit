@@ -112,7 +112,7 @@ https://github.com/Catherine618/aiguard-reference-kit
 ### 重要说明
 
 - **必须获取完整仓库**：Skill 通过相对路径引用资料包中的文档，只复制 Skill 目录会导致文档引用失效
-- **固件单独下载**：固件二进制文件不包含在仓库中，请从 [Gitee Release](https://gitee.com/<owner>/aiguard-reference-kit/releases) 页面下载
+- **固件单独下载**：固件二进制文件不包含在仓库中，请从 [https://github.com/Catherine618/aiguard-reference-kit/releases](https://github.com/Catherine618/aiguard-reference-kit/releases) 页面下载
 - **支持多平台**：Skill 兼容 trae / claude-code / cursor / codex-cli 等 Agent 平台
 
 ## 固件获取
