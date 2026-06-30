@@ -125,7 +125,7 @@ https://github.com/Catherine618/aiguard-reference-kit
 | P4中控屏V0.5 | v0.5 | ESP32-P4-WIFI6-Touch-LCD-7B | 纯Dashboard固件 |
 | P4中控屏V1.0 | v1.0 | ESP32-P4-WIFI6-Touch-LCD-7B | 接入小智语音 |
 
-下载地址：`https://gitee.com/<owner>/aiguard-reference-kit/releases`
+下载地址：`https://github.com/Catherine618/aiguard-reference-kit/releases`
 
 下载后请使用 SHA-256 校验文件完整性，校验值见 [06-firmware/checksums.txt](06-firmware/checksums.txt)。
 
