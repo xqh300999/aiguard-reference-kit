@@ -22,4 +22,7 @@ Desktop.ini
 # Logs
 *.log
 
-# 注意：固件二进制文件（*.zip）不忽略，直接纳入Git版本控制
+# 固件二进制文件不纳入Git版本控制，通过Gitee Release分发
+06-firmware/xiaozhi/*.zip
+06-firmware/xiaozhi/*.bin
+*.bin

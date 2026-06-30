@@ -79,6 +79,8 @@
 | 手表引脚、GPIO定义 | 04-hardware/esp32-s3-watch/pinout.md |
 | ESP32-P4中控屏、触摸屏、7寸屏 | 04-hardware/esp32-p4-panel/README.md |
 | 中控屏引脚、GPIO定义 | 04-hardware/esp32-p4-panel/pinout.md |
+| P4固件版本、V0.5、V1.0、overlay注入、小智集成 | 04-hardware/esp32-p4-panel/firmware-versions.md |
+| P4刷写、版本选择、配网 | 04-hardware/esp32-p4-panel/flashing-guide.md |
 | QMI8658、IMU、六轴、跌倒检测、加速度计、陀螺仪 | 04-hardware/sensors/qmi8658.md |
 | 门磁、温湿度、烟雾、传感器选型 | 04-hardware/sensors/other-sensors.md |
 | HA兼容设备、传感器推荐 | 04-hardware/home-assistant/supported-devices.md |
@@ -94,7 +96,8 @@
 ### 固件相关
 | 问题关键词 | 文档路径 |
 |-----------|----------|
-| 固件下载、固件版本、v2.2.4 | 06-firmware/xiaozhi/README.md |
+| 固件下载、固件版本、v2.2.4、Gitee Release | 06-firmware/xiaozhi/README.md |
+| P4固件V0.5、P4固件V1.0、固件对比 | 06-firmware/README.md |
 | 浏览器刷固件、ESP Web Tools | 06-firmware/flashing-tools/esp-web-tools.md |
 | esptool.py、命令行刷写 | 06-firmware/flashing-tools/esptool.md |
 | USB驱动、驱动安装 | 06-firmware/notes/driver-installation.md |

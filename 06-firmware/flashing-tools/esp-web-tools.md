@@ -15,6 +15,47 @@ ESP Web Tools 是由 ESPHome 团队开发的开源Web刷写工具，允许用户
 3. ESP开发板
 4. 稳定的网络连接（需从网络加载固件）
 
+## 固件下载
+
+> **重要**：固件二进制文件不再存放在本仓库中。使用 ESP Web Tools 刷写前，请先从 Gitee Release 下载所需固件到本地。
+
+### 下载地址
+
+固件通过 Gitee Release 发布，下载地址格式为：
+
+```
+https://gitee.com/<owner>/aiguard-reference-kit/releases/download/v<版本>/<下载文件>
+```
+
+> ⚠️ `<owner>` 与 `<Gitee仓库地址>` 为占位符，**请替换为实际 Gitee 仓库地址**。
+
+### 各固件下载链接（占位）
+
+| 固件 | 版本 | 下载文件 | 下载地址（占位） |
+|------|------|----------|------------------|
+| ESP32-S3 手表 | v2.2.4 | v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip | `https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v2.2.4/v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip` |
+| ESP32-P4 中控屏 V0.5 | v0.5 | aiguard_p4_panel_v0.5.bin | `https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v0.5/aiguard_p4_panel_v0.5.bin` |
+| ESP32-P4 中控屏 V1.0 | v1.0 | xiaozhi_p4_panel_v1.0_merged.bin | `https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v1.0/xiaozhi_p4_panel_v1.0_merged.bin` |
+
+Release 总览页：`https://<Gitee仓库地址>/aiguard-reference-kit/releases`
+
+### 下载与校验步骤
+
+```bash
+# 1. 创建一个本地目录存放固件（示例）
+mkdir -p ~/aiguard-firmware && cd ~/aiguard-firmware
+
+# 2. 下载固件（以 ESP32-P4 V1.0 为例，请替换 <Gitee仓库地址>）
+curl -L -O https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v1.0/xiaozhi_p4_panel_v1.0_merged.bin
+
+# 3. 校验 SHA-256（推荐，校验值以 Release 附件页公布的为准）
+shasum -a 256 xiaozhi_p4_panel_v1.0_merged.bin
+```
+
+> ESP Web Tools 通常通过 manifest.json 中的 `path` 字段加载固件。如使用本地托管的刷写页面，请将下载的固件文件放到 manifest.json 所在目录，并确保 `path` 指向本地文件；如使用官方/远程托管页面，则页面会自动从 manifest 中的 URL 拉取固件，但仍建议提前下载并在本地保留一份以备离线刷写。
+
+下载完成后，即可按下文步骤使用 ESP Web Tools 刷写到设备。
+
 ## 使用步骤
 
 ### 第一步：打开刷写页面
@@ -40,9 +81,10 @@ ESP Web Tools 是由 ESPHome 团队开发的开源Web刷写工具，允许用户
 
 ### 第三步：选择固件版本
 
-页面列出可用的固件版本，选择对应硬件的版本：
-- 选择 `xiaozhi-v2.2.4-esp32s3-watch`（对应Waveshare ESP32-S3手表板）
-- 如面板固件已支持，选择对应P4版本
+页面列出可用的固件版本，选择对应硬件的版本（请与「固件下载」一节下载的文件对应）：
+- `xiaozhi-v2.2.4-esp32s3-watch` —— 对应 Waveshare ESP32-S3 手表板（固件文件 `v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip`）
+- `aiguard-p4-panel-v0.5` —— 对应 Waveshare ESP32-P4 中控屏（纯 Dashboard，固件文件 `aiguard_p4_panel_v0.5.bin`）
+- `xiaozhi-p4-panel-v1.0` —— 对应 Waveshare ESP32-P4 中控屏（接入小智，固件文件 `xiaozhi_p4_panel_v1.0_merged.bin`）
 
 ### 第四步：开始刷写
 

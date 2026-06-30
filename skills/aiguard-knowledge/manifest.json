@@ -1,0 +1,13 @@
+{
+  "name": "aiguard-knowledge",
+  "version": "1.1.1",
+  "category": "Education · IoT Smart Home Eldercare Project Knowledge Assistant",
+  "description": "智守AI-Guard教学项目知识助手：提供技术栈文档检索、硬件规格查询（ESP32-S3手表/ESP32-P4中控屏V0.5/V1.0固件）、故障排查引导、敏捷开发支持。Invoke when students ask about AI-Guard project tech stack, hardware, firmware versions, troubleshooting, setup, or development process.",
+  "homepage": "https://gitee.com/<owner>/aiguard-reference-kit",
+  "compat": [
+    "trae",
+    "claude-code",
+    "cursor",
+    "codex-cli"
+  ]
+}

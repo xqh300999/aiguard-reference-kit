@@ -33,6 +33,50 @@ pip install --upgrade esptool
 
 > ESP32-P4支持需要 esptool.py v4.7 或更高版本。
 
+## 固件下载
+
+> **重要**：固件二进制文件不再存放在本仓库中，使用 esptool 刷写前，请先从 Gitee Release 下载所需固件到本地。
+
+### 下载地址
+
+固件通过 Gitee Release 发布，下载地址格式为：
+
+```
+https://gitee.com/<owner>/aiguard-reference-kit/releases/download/v<版本>/<下载文件>
+```
+
+> ⚠️ `<owner>` 与 `<Gitee仓库地址>` 为占位符，**请替换为实际 Gitee 仓库地址**。
+
+### 各固件下载链接（占位）
+
+| 固件 | 版本 | 下载文件 | 下载地址（占位） |
+|------|------|----------|------------------|
+| ESP32-S3 手表 | v2.2.4 | v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip | `https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v2.2.4/v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip` |
+| ESP32-P4 中控屏 V0.5 | v0.5 | aiguard_p4_panel_v0.5.bin | `https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v0.5/aiguard_p4_panel_v0.5.bin` |
+| ESP32-P4 中控屏 V1.0 | v1.0 | xiaozhi_p4_panel_v1.0_merged.bin | `https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v1.0/xiaozhi_p4_panel_v1.0_merged.bin` |
+
+Release 总览页：`https://<Gitee仓库地址>/aiguard-reference-kit/releases`
+
+### 下载与校验步骤
+
+```bash
+# 1. 创建一个本地目录存放固件（示例）
+mkdir -p ~/aiguard-firmware && cd ~/aiguard-firmware
+
+# 2. 下载固件（以 ESP32-S3 手表固件为例，请替换 <Gitee仓库地址>）
+curl -L -O https://<Gitee仓库地址>/aiguard-reference-kit/releases/download/v2.2.4/v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip
+
+# 3. （若是 zip 包）解压
+unzip v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip
+
+# 4. 校验 SHA-256（推荐，校验值以 Release 附件页公布的为准）
+shasum -a 256 v2.2.4_waveshare-esp32-s3-touch-amoled-2.06.zip
+```
+
+> P4 固件为单文件 `.bin`，无需解压，下载后可直接刷写。
+
+下载完成后，即可使用下文的 esptool 命令刷写到设备。
+
 ## 基本命令
 
 ### 1. 查看串口/确认连接
@@ -138,22 +182,56 @@ esptool.py --chip esp32s3 --port PORT read_flash 0x0 0x200000 flash-backup.bin
 esptool.py --chip esp32s3 --port PORT verify_flash 0x0 firmware.bin
 ```
 
-## AIguard v2.2.4 刷写示例
+## AIguard 固件刷写示例
 
-### ESP32-S3-Watch（合并固件）
+> 前置条件：已按上文「固件下载」一节，将固件下载并解压（如需）到本地目录（示例使用 `~/aiguard-firmware`）。
+
+### ESP32-S3-Watch v2.2.4（合并固件）
 
 ```bash
-# 1. 进入固件目录
-cd /Volumes/EricHDD/pycharm_project/AIguard/aiguard-reference-kit/06-firmware/xiaozhi
+# 1. 进入本地固件目录（已从 Gitee Release 下载并解压 zip 包）
+cd ~/aiguard-firmware
 
 # 2. 擦除Flash（可选，首次推荐）
 esptool.py --chip esp32s3 --port /dev/cu.usbmodem101 erase_flash
 
-# 3. 刷写固件
+# 3. 刷写固件（使用 zip 包内的合并固件 factory/merged 文件）
 esptool.py --chip esp32s3 --port /dev/cu.usbmodem101 --baud 921600 write_flash -z 0x0 xiaozhi-v2.2.4-esp32s3-watch-factory.bin
 
 # 4. 复位设备（或按RESET键）
 esptool.py --chip esp32s3 --port /dev/cu.usbmodem101 run
+```
+
+### ESP32-P4 中控屏 V0.5（纯 Dashboard）
+
+```bash
+# 1. 进入本地固件目录（已从 Gitee Release 下载 aiguard_p4_panel_v0.5.bin）
+cd ~/aiguard-firmware
+
+# 2. 擦除Flash（可选，首次推荐）
+esptool.py --chip esp32p4 --port /dev/cu.usbmodem101 erase_flash
+
+# 3. 刷写固件（单文件，直接刷到 0x0）
+esptool.py --chip esp32p4 --port /dev/cu.usbmodem101 --baud 921600 write_flash -z 0x0 aiguard_p4_panel_v0.5.bin
+
+# 4. 复位设备（或按RESET键）
+esptool.py --chip esp32p4 --port /dev/cu.usbmodem101 run
+```
+
+### ESP32-P4 中控屏 V1.0（接入小智）
+
+```bash
+# 1. 进入本地固件目录（已从 Gitee Release 下载 xiaozhi_p4_panel_v1.0_merged.bin）
+cd ~/aiguard-firmware
+
+# 2. 擦除Flash（可选，首次推荐）
+esptool.py --chip esp32p4 --port /dev/cu.usbmodem101 erase_flash
+
+# 3. 刷写固件（合并固件，直接刷到 0x0）
+esptool.py --chip esp32p4 --port /dev/cu.usbmodem101 --baud 921600 write_flash -z 0x0 xiaozhi_p4_panel_v1.0_merged.bin
+
+# 4. 复位设备（或按RESET键）
+esptool.py --chip esp32p4 --port /dev/cu.usbmodem101 run
 ```
 
 ### 批量刷写脚本示例

@@ -267,3 +267,168 @@
 - **交叉验证**：把可疑模块接到好的主板上，好的模块接到可疑主板上
 - **测量工具**：善用万用表测电压通断、逻辑分析仪看通信波形、示波器看信号质量
 - **安全第一**：接触硬件前断电、放电；注意防静电；不要带电接线
+
+---
+
+## 五、ESP32-P4 中控屏已知问题
+
+本节汇总 AI-Guard 项目在 Waveshare ESP32-P4-WIFI6-Touch-LCD-7B 中控屏开发与运行过程中遇到的典型问题。每个问题按"症状 → 可能原因 → 排查步骤 → 解决方案"四段式描述。详细的开发经验与修复记录见 [04-hardware/esp32-p4-panel/firmware-versions.md](../04-hardware/esp32-p4-panel/firmware-versions.md)。
+
+### 5.1 启动时 crash（lwIP 未就绪，首次轮询需延迟 5 秒）
+
+- **症状**：设备启动后立即 crash，串口 backtrace 指向 lwIP 或 netif 相关函数；或启动后第一次 HTTP 轮询直接失败并触发 panic。
+- **可能原因**：WiFi 协处理器（ESP32-C6）通过 SDIO 与 ESP32-P4 通信，初始化需要时间。若主任务在 WiFi 连接建立前就发起 HTTP 请求，lwIP 协议栈尚未就绪，会触发空指针访问或 socket 创建失败，进而 panic。
+- **排查步骤**：
+  1. 串口日志确认 crash 地址是否在 `esp_http_client` 或 `lwip_*` 函数内。
+  2. 在 HTTP 首次请求前加日志打印 `esp_wifi_get_ip_info()` 返回的 IP，确认是否为 `0.0.0.0`。
+  3. 若 IP 为空，说明 WiFi 未就绪，crash 即源于此。
+- **解决方案**：
+  - 主任务启动后等待 WiFi 连接事件（推荐用事件组 `EventGroupHandle_t`）。
+  - 或在主循环首次轮询前 `vTaskDelay(pdMS_TO_TICKS(5000))` 延迟 5 秒。
+  - HTTP 请求加超时与重试，失败时跳过本轮而不是 panic。
+  - 永远不要在 WiFi 未连接时阻塞主任务，否则会触发 Task WDT。
+
+### 5.2 触摸坐标 180° 错位（GT911 物理安装与 LCD 相差 180°）
+
+- **症状**：点击屏幕左上角，响应出现在右下角；点击右下角，响应出现在左上角。整体如同坐标系旋转了 180°。
+- **可能原因**：Waveshare ESP32-P4-7B 的 GT911 触控芯片物理安装方向与 LCD 面板相差 180°。出厂 Demo 可能在 LCD 驱动中做了软件旋转补偿，但小智 BSP（V1.0）或自定义固件（V0.5）默认未做该补偿。
+- **排查步骤**：
+  1. 在触摸事件回调中打印 `(x, y)` 坐标。
+  2. 点击屏幕四个角，对比打印坐标与实际点击位置。
+  3. 若四个角的坐标都呈现"左上↔右下、左下↔右上"的翻转关系，则确认为 180° 错位。
+- **解决方案**：
+  - 在 GT911 驱动的触摸数据读取处，将 `(x, y)` 替换为 `(screen_width - 1 - x, screen_height - 1 - y)`。
+  - 屏幕分辨率 1024×600，故变换为 `(1023 - x, 599 - y)`。
+  - 修改打包为补丁，V1.0 中放在 overlay 的 `patches/0001-gt911-rotate-180.patch`。
+  - 修改后重新编译刷写，再次点击四角验证坐标正确。
+
+### 5.3 中文文字不显示（硬编码字体子集 → 改 nullptr 继承主题字体）
+
+- **症状**：UI 上中文标签位置显示为空白、方块（□）或乱码；英文与数字显示正常。
+- **可能原因**：
+  - V0.5：字体子集（`font_sc_24.c` 等）未包含该中文字符。
+  - V1.0：直接复用 V0.5 的 `lv_obj_set_style_text_font(label, &font_sc_24, 0)` 调用，覆盖了小智 `Assets::Apply()` 设置的屏幕主题字体；而字体子集在小智环境下未正确加载或字符不全。
+- **排查步骤**：
+  1. 临时移除 `set_style_text_font` 调用，看中文是否显示（V1.0 场景）。
+  2. 若移除后正常，则是字体子集覆盖了主题字体。
+  3. V0.5 场景：检查 `glyphs.txt` 是否包含该字符，对照 `lv_label_set_text` 中的字符串。
+- **解决方案**：
+  - **V1.0（推荐）**：删除所有 AI-Guard 标签的 `set_style_text_font` 调用，让 `text_font` 保持 `nullptr`，自动继承小智屏幕主题字体（mmap 完整 CJK 字体）。字号通过小智预设 `font_small` / `font_medium` / `font_large` / `font_xlarge` 控制。
+  - **V0.5**：用 `lv_font_conv` 重新生成字体子集，把遗漏的字符加入 `glyphs.txt`，重新编译。每次新增中文文案都要重新生成。
+  - 字体文件路径与加载逻辑需与 CMakeLists.txt 中注册的一致。
+
+### 5.4 屏幕几秒一重启（10Hz UI 刷新闪屏 → 改 1Hz 定期刷新）
+
+- **症状**：设备运行后，屏幕每隔几秒黑屏再亮，UI 反复重置；串口日志可能看到 LVGL 任务重启或 Task WDT 触发。
+- **可能原因**：V0.5 遗留的 10Hz UI 刷新策略（每 100ms 全量刷新所有卡片）在小智环境下与 LVGL 渲染任务冲突。频繁的全量刷新导致：
+  - LVGL 渲染任务被频繁打断，触发看门狗。
+  - 显存频繁重分配，导致内存碎片或溢出。
+  - LVGL 内部状态不一致，任务异常重启。
+- **排查步骤**：
+  1. 在 UI 刷新函数入口加日志计数，确认刷新频率。
+  2. 临时把刷新间隔改为 1 秒（1000ms），看重启是否消失。
+  3. 若降频后正常，则是刷新频率过高导致。
+- **解决方案**：
+  - UI 刷新改为 **1Hz 定期刷新**（每秒一次）。
+  - 告警状态变化时**立即触发一次刷新**（事件驱动），保证告警实时性。
+  - action queue 仍保持 100ms 轮询，但 queue 中绝大多数时候是空的，实际刷新只在 1Hz 或告警变化时发生。
+  - 检查是否有其他高频任务（如触摸扫描、传感器读取）也在竞争 LVGL，必要时降低其频率或移入 LP 核心。
+
+### 5.5 SetTheme 空指针崩溃（基类 widget nullptr → 加 nullptr 守护）
+
+- **症状**：调用 `lv_obj_set_style_*` 或 `lv_label_set_text` 时崩溃，串口 backtrace 指向 `lv_obj` 内部函数（如 `lv_obj_set_style_text_color`、`lv_obj_refresh_style`）。
+- **可能原因**：
+  - 基类 widget（如 screen 本身）在 `lv_obj_create` 后未正确初始化，`obj->spec_attr` 或 `obj->style_list` 为 `nullptr`。
+  - LVGL 内部解引用空指针，触发 `LoadStoreError` 或 `Guru Meditation Error`。
+  - 也可能是 use-after-free：widget 已被 `lv_obj_delete` 但仍有引用，再次访问时内部数据已被覆盖。
+- **排查步骤**：
+  1. 在 crash 处加 `assert(obj != nullptr)` 与日志打印 `obj`、`obj->spec_attr` 地址。
+  2. 确认 `lv_obj_create` 返回值非空。
+  3. 排查 `lv_obj_delete` 后是否还有对该 widget 的访问（悬垂指针）。
+  4. 启用 LVGL 的 `LV_USE_ASSERT_OBJ` 配置项，让 LVGL 在对象无效时主动断言。
+- **解决方案**：
+  - 所有 widget 创建后立即检查返回值非空：`lv_obj_t *label = lv_label_create(parent); assert(label);`。
+  - 调用 `lv_obj_set_style_*` 前加 nullptr 守护：`if (obj && obj->spec_attr) { lv_obj_set_style_*(); }`。
+  - widget 删除后立即把对应指针置空：`lv_obj_delete(label); label = NULL;`。
+  - 排查所有 `lv_obj_delete` 调用，确认没有悬垂引用。
+
+### 5.6 OGG 播放无声（必须是 OPUS 编码，Vorbis 会被丢弃）
+
+- **症状**：把告警音 `.ogg` 文件放入 assets 目录，编译刷写后触发播放，扬声器无声；串口日志无错误，但也没有解码活动。
+- **可能原因**：OGG 是容器格式，内部音频编码可以是 Vorbis 或 OPUS。小智的音频解码器只支持 OPUS，Vorbis 编码的 OGG 会被静默丢弃（不报错，但不播放）。常见的 OGG 编辑器或在线转换工具默认输出 Vorbis 编码。
+- **排查步骤**：
+  1. 用 `ffprobe alarm.ogg` 查看内部编码：
+     ```bash
+     ffprobe -v error -show_entries stream=codec_name alarm.ogg
+     ```
+  2. 若输出 `codec_name=vorbis`，则是编码格式不对。
+  3. 若输出 `codec_name=opus`，则编码正确，问题在别处（音量、音频管线、ES8311 配置）。
+- **解决方案**：
+  ```bash
+  # 将 Vorbis OGG 转为 OPUS OGG
+  ffmpeg -i alarm_vorbis.ogg -c:a libopus -b:a 32k alarm_opus.ogg
+  ```
+  - 替换 assets 中的文件后重新编译刷写。
+  - AI-Guard 告警音统一采用 OPUS 编码，码率 32kbps 足够。
+  - 验证：`ffprobe` 输出 `codec_name=opus` 后再投入 assets。
+  - 检查 ffmpeg 是否启用 libopus：`ffmpeg -version | grep libopus`，若无则需重新安装含 libopus 的 ffmpeg。
+
+### 5.7 Task WDT（需要 BSP display lock 或 lvgl_port_lock）
+
+- **症状**：串口日志出现 `Task watchdog got triggered. The following tasks did not reset the watchdog in time`，列出超时的任务名（如 `main`、`lvgl`、`IDLE0`），系统随后重启。
+- **可能原因**：
+  - 多任务并发访问 LVGL 对象树，主任务在 LVGL 渲染期间被阻塞，无法喂狗。
+  - HTTP 请求在 LVGL lock 内执行，lock 持有时间过长（HTTP 可能阻塞数秒）。
+  - 主循环 `while(true)` 没有 `vTaskDelay` 让出 CPU，低优先级任务（包括 IDLE 喂狗任务）得不到调度。
+  - LVGL 渲染任务被频繁打断，渲染超时。
+- **排查步骤**：
+  1. 串口日志确认是哪个任务触发 WDT（任务名在日志中）。
+  2. 若是 `main` 任务，检查主循环是否有 `vTaskDelay`。
+  3. 若是 `lvgl` 任务，检查是否有其他任务在频繁抢占 LVGL 访问。
+  4. 检查 menuconfig 中 `CONFIG_ESP_TASK_WDT_TIMEOUT_S`（默认 5 秒）。
+  5. 在 HTTP 请求前后加日志，确认是否在 lock 内阻塞。
+- **解决方案**：
+  - **V0.5**：所有 LVGL 访问包裹在 `bsp_display_lock(200)` / `bsp_display_unlock()` 之间，超时 200ms。HTTP 请求移出 lock 区，先拿数据再 lock 刷新 UI。
+  - **V1.0**：用 `lvgl_port_lock(30000)`（30 秒超时）保护 C 代码的 LVGL 访问；复杂刷新用 `Application::Schedule()` 投递到主任务。
+  - 主循环必须有 `vTaskDelay(pdMS_TO_TICKS(100))` 让出 CPU。
+  - 若仍触发，适当调大 `CONFIG_ESP_TASK_WDT_TIMEOUT_S`（如 10 秒），但治本之策是消除长阻塞。
+  - HTTP 请求加超时（`esp_http_client_set_timeout_ms`），避免网络异常时无限阻塞。
+
+### 5.8 HTTP 403（需要 device token 认证）
+
+- **症状**：所有 API 请求返回 HTTP 403 Forbidden；Dashboard 数据不刷新（显示为 `--` 或上次值）；串口日志可见 `HTTP 403` 错误。
+- **可能原因**：AI-Guard 后端 REST API 要求设备携带 device token 进行身份认证。请求头缺少 `Authorization: Bearer <token>`，或 token 错误、过期、未授权访问该资源。
+- **排查步骤**：
+  1. 用 `curl` 模拟设备请求，确认后端是否接受该 token：
+     ```bash
+     curl -H "Authorization: Bearer <your_token>" \
+          -H "Content-Type: application/json" \
+          http://<backend-host>/api/v1/devices/me/status
+     ```
+  2. 若 curl 也返回 403，则是 token 本身问题（错误、过期、未授权）。
+  3. 若 curl 返回 200，则是固件侧请求头未正确发送：
+     - 检查 menuconfig 中 `CONFIG_AIGUARD_DEVICE_TOKEN` 是否正确配置。
+     - 抓包确认请求头是否真的带上了 `Authorization`（有些 HTTP 客户端库会吞掉自定义头）。
+  4. 检查 token 是否包含特殊字符（如空格、引号），可能需要 URL 编码。
+- **解决方案**：
+  - 正确配置 device token（menuconfig `CONFIG_AIGUARD_DEVICE_TOKEN`）。
+  - 在 HTTP 客户端初始化时显式设置请求头：
+    ```c
+    esp_http_client_header_add(client, "Authorization", "Bearer " CONFIG_AIGUARD_DEVICE_TOKEN);
+    ```
+  - V1.0 中使用小智 `Network::CreateHttp()` 时，同样需要在请求头中添加 `Authorization`。
+  - 若 token 经常过期，考虑改用 OAuth2 刷新令牌机制（产品化场景）。
+  - 后端日志确认 token 的过期时间与权限范围。
+
+### 5.9 其他偶发问题速查
+
+| 症状 | 可能原因 | 快速解决 |
+|------|----------|----------|
+| 启动后屏幕完全黑屏 | 背光 GPIO23 未使能 / 屏幕初始化序列未执行 | 检查背光引脚配置，确认 `bsp_display_start()` 调用成功 |
+| 启动后屏幕花屏 | MIPI-DSI 时序参数错误 / 显存地址错乱 | 核对 menuconfig 中 DSI 参数，确认 PSRAM 显存映射 |
+| WiFi 连接后频繁断开 | 信号弱 / 路由器踢设备 / ESP32-C6 固件异常 | 靠近路由器，关闭路由器"节能"模式，必要时重刷 C6 固件 |
+| 语音交互卡顿 | 网络抖动 / OPUS 解码无 PLC 补包 | 改善网络环境，等待小智上游加入 PLC 支持 |
+| OTA 升级失败 | OTA URL 错误 / 分区空间不足 / 网络中断 | 核对 menuconfig 中 OTA URL，确认 app 分区剩余 ≥ 13% |
+| 长按 10 秒无法进入重配网 | 按键检测逻辑异常 / 已在配网模式 | 串口日志确认按键事件，重启后重试 |
+
+更多问题与开发经验详见 [04-hardware/esp32-p4-panel/firmware-versions.md](../04-hardware/esp32-p4-panel/firmware-versions.md) 的"真机调试修复记录"章节。

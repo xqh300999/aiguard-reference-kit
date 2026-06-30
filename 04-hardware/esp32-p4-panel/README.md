@@ -120,3 +120,72 @@ ESP32-P4-WIFI6-Touch-LCD-7B 是微雪电子推出的基于 ESP32-P4 芯片的高
 
 - 官方Wiki：https://www.waveshare.com/wiki/ESP32-P4-WIFI6-Touch-LCD-7B
 - ESP32-P4 技术参考手册：https://www.espressif.com/sites/default/files/documentation/esp32-p4_technical_reference_manual_en.pdf
+
+## 固件版本历史
+
+本节记录 ESP32-P4 中控屏在 AI-Guard 项目中的固件演进，包含两个里程碑版本。详细的开发经验、调试记录与升级路径请参考 [firmware-versions.md](./firmware-versions.md)。
+
+### V0.5 — 纯原生 Dashboard 固件
+
+- **发布日期**：2026-06-26
+- **Git标签**：`v0.5.0-panel-dashboard`
+- **定位**：不含小智语音助手的纯 Dashboard 固件，面向嵌入式 GUI 教学
+- **功能范围**：
+  - 1024×600 深色玻璃质感 Dashboard（顶栏 + 快捷动作区 + 状态网格 + 告警覆盖层）
+  - HTTP 轮询后端 API（5 秒间隔）获取温湿度 / 烟感 / 气感 / 门磁数据
+  - SOS 紧急呼叫（30 秒倒计时）+ 夜灯控制
+  - 告警评估纯函数（优先级：SOS > 烟感 > 气感 > 门磁超时）
+  - ES8311 扬声器告警音（1200Hz 正弦波）
+  - LVGL 9.x 玻璃卡片布局，Lucide SVG 图标 + Source Han Sans SC 字体子集
+- **技术栈**：ESP-IDF v5.5.2 + LVGL 9.5 + Waveshare BSP + esp_hosted 1.4.7
+- **WiFi 配网**：menuconfig 编译时硬编码（不支持运行时配网）
+- **验证状态**：✅ 已验证（真机 ESP32-P4 rev v1.3，WiFi 连接稳定，无 WDT / crash）
+- **已知限制**：无语音交互、无 OTA、WiFi 不能运行时配置
+
+### V1.0 — 接入小智语音助手
+
+- **发布日期**：2026-06-29
+- **基线**：小智 xiaozhi-esp32 v2.2.4 (commit `e77dedb`)
+- **定位**：在保留小智完整语音链路基础上，注入 AI-Guard Dashboard 作为前景 UI
+- **新增功能（相比 V0.5）**：
+  - 小智完整语音交互（唤醒、聆听、TTS、AEC 回声消除）
+  - 小智 Dock 下区（Twemoji 拟人表情图标 + 状态小字 + 对话正文横向滚动）
+  - 点击"小智"按钮触发 `ToggleChatState` + `OGG_SUCCESS` 提示音
+  - 15 秒静音自动回待机
+  - AP 配网模式（`Xiaozhi-XXXX` 热点 + 浏览器 `192.168.4.1`）
+  - 长按 10 秒进入 WiFi 重配网模式
+  - 小智原生 OTA 升级支持
+  - 告警音改为 OPUS 编码 OGG（嘟嘟嘟 4 音，3 秒间隔重复）
+- **技术架构变更**：
+  - 采用 Overlay 注入方案（非 Fork）：保留小智源码树原样，通过 `apply-overlay.sh` 注入 AI-Guard 代码
+  - esp_hosted 升级到 2.0.17（小智默认）
+  - ES8311 单 owner 原则：小智 `BoxAudioCodec` 独占，告警音走 `Application::PlaySound`
+  - HTTP 客户端改用小智 `Board::GetInstance().GetNetwork()->CreateHttp()`
+  - LVGL 线程安全：`Application::Schedule()` 投递到主任务 + `lvgl_port_lock(30000)` 公共 C API
+  - 中文字体：文本标签用 `nullptr` 继承 screen 主题字体（小智 `Assets::Apply()` mmap 完整 CJK 字体）
+  - UI 刷新：1Hz 定期刷新 + 告警状态变化立即刷新（action queue 仍 100ms 轮询）
+- **验证状态**：✅ 已验证（51 个契约测试通过，真机启动稳定，配网 + 语音交互正常）
+- **已知限制**：
+  - OPUS 解码器无 PLC 补包，网络抖动时可能破音
+  - 全双工打断需服务器端 VAD 支持（固件已支持 realtime 模式）
+  - app 分区仅剩 13%（~540KB）
+  - OTA URL 编译时硬编码
+  - 摄像头 OV5647 硬件存在但未启用
+
+### V0.5 vs V1.0 核心区别对比表
+
+| 维度 | V0.5（纯 Dashboard） | V1.0（接入小智） |
+|------|---------------------|-------------------|
+| 构建方式 | 原生 ESP-IDF 项目 | 小智源码树 + overlay 注入 |
+| esp_hosted | 1.4.7 | 2.0.17 |
+| WiFi 配网 | menuconfig 编译时硬编码 | AP 配网 + 长按 10s 重配网 |
+| 音频系统 | 独立 ES8311 句柄 | ES8311 单 owner（小智独占） |
+| HTTP 客户端 | `esp_http_client` | 小智 `Network::CreateHttp()` |
+| LVGL 线程安全 | `bsp_display_lock(200)` | `Schedule()` + `lvgl_port_lock(30000)` |
+| UI 刷新 | 100ms 每 tick 更新 | 1Hz 定期 + 告警变化立即刷新 |
+| 中文字体 | Source Han Sans 子集（20/24px） | `nullptr` 继承主题字体（mmap 完整 CJK） |
+| BottomDock | 空文本条（预留） | Twemoji 表情 + 状态 + 对话滚动 |
+| 告警音 | 1200Hz 正弦波 | OPUS OGG 嘟嘟嘟 4 音 |
+| OTA | 未实现 | 小智原生 OTA |
+| bin 大小 | ~1.6MB（app free 80%） | ~3.42MB（app free 13%） |
+| 契约测试 | 4 个 | 51 个 |
