@@ -99,7 +99,7 @@ aiguard-reference-kit/
 
 在 AI 编程助手中提供本仓库地址即可：
 ```
-https://github.com/Catherine618/aiguard-reference-kit
+https://gitee.com/Catherine618/aiguard-reference-kit
 ```
 助手会自动 clone 整个仓库并识别 `skills/aiguard-knowledge/` 中的 Skill。
 
@@ -112,7 +112,7 @@ https://github.com/Catherine618/aiguard-reference-kit
 ### 重要说明
 
 - **必须获取完整仓库**：Skill 通过相对路径引用资料包中的文档，只复制 Skill 目录会导致文档引用失效
-- **固件单独下载**：固件二进制文件不包含在仓库中，请从 [https://github.com/Catherine618/aiguard-reference-kit/releases](https://github.com/Catherine618/aiguard-reference-kit/releases) 页面下载
+- **固件单独下载**：固件二进制文件不包含在仓库中，请从 [https://gitee.com/Catherine618/aiguard-reference-kit/releases](https://gitee.com/Catherine618/aiguard-reference-kit/releases) 页面下载
 - **支持多平台**：Skill 兼容 trae / claude-code / cursor / codex-cli 等 Agent 平台
 
 ## 固件获取
@@ -125,7 +125,7 @@ https://github.com/Catherine618/aiguard-reference-kit
 | P4中控屏V0.5 | v0.5 | ESP32-P4-WIFI6-Touch-LCD-7B | 纯Dashboard固件 |
 | P4中控屏V1.0 | v1.0 | ESP32-P4-WIFI6-Touch-LCD-7B | 接入小智语音 |
 
-下载地址：`https://github.com/Catherine618/aiguard-reference-kit/releases`
+下载地址：`https://gitee.com/Catherine618/aiguard-reference-kit/releases`
 
 下载后请使用 SHA-256 校验文件完整性，校验值见 [06-firmware/checksums.txt](06-firmware/checksums.txt)。
 
