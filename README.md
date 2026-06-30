@@ -99,7 +99,7 @@ aiguard-reference-kit/
 
 在 AI 编程助手中提供本仓库地址即可：
 ```
-https://gitee.com/<owner>/aiguard-reference-kit
+https://github.com/Catherine618/aiguard-reference-kit
 ```
 助手会自动 clone 整个仓库并识别 `skills/aiguard-knowledge/` 中的 Skill。
 
