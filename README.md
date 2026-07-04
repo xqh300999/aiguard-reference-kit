@@ -1,6 +1,6 @@
 # AiGuard 参考资料包
 
-> **版本**：v1.1.1 ｜ **协议**：MIT ｜ **用途**：本文档是 AiGuard 参考资料包的入口说明，介绍资料包定位、内容结构、知识地图与使用方式。
+> **版本**：v1.2.0 ｜ **协议**：MIT ｜ **用途**：本文档是 AiGuard 参考资料包的入口说明，介绍资料包定位、内容结构、知识地图、课程协作入口与使用方式。
 
 ## 资料包定位
 
@@ -9,9 +9,22 @@ AiGuard 参考资料包是一套面向智能家居养老看护系统开发的学
 - ✅ 提供功能目标与需求说明
 - ✅ 提供参考架构与最佳实践
 - ✅ 提供开发流程与敏捷实践模板
+- ✅ 提供小学期课程 Git 协作、Issue 求助、Sprint 验收与考核说明
 - ❌ 不限制具体技术实现方式
 - ❌ 不强制使用特定框架或工具
 - 💡 鼓励创新与探索更优方案
+
+## 小学期课程协作入口
+
+如果你是《全栈系统设计与实现》小学期学生，请先阅读课程运行规则：
+
+1. [09-course-operation/README.md](09-course-operation/README.md)：课程协作总入口
+2. [09-course-operation/git-workflow.md](09-course-operation/git-workflow.md)：分支、提交、PR/MR 与证据关联规则
+3. [09-course-operation/issue-rules.md](09-course-operation/issue-rules.md)：问题求助、Bug 提交与 Issue 关闭规范
+4. [09-course-operation/sprint-checklist.md](09-course-operation/sprint-checklist.md)：每个 Sprint 的交付物与验收清单
+5. [09-course-operation/assessment.md](09-course-operation/assessment.md)：课程评价与过程证据说明
+
+> 注意：`main` 分支由教师维护，用于发布资料、模板和稳定说明。学生小组请在各自小组分支开展开发与文档维护，例如 `team-a/dev`、`team-b/dev`、`team-c/dev`、`team-d/dev`。不要直接向 `main` 提交课程代码。
 
 ## 知识地图
 
@@ -58,14 +71,32 @@ aiguard-reference-kit/
 │   ├── frontend.md              # 前端层排查
 │   ├── hardware.md              # 硬件层排查
 │   └── faq.md                   # 常见问题 FAQ
-└── 08-additional-resources/     # 附加资源
-    ├── useful-tools.md          # 推荐工具
-    ├── tutorials.md             # 教程链接
-    ├── community-links.md       # 社区链接
-    └── case-studies.md          # 案例研究
+├── 08-additional-resources/     # 附加资源
+│   ├── useful-tools.md          # 推荐工具
+│   ├── tutorials.md             # 教程链接
+│   ├── community-links.md       # 社区链接
+│   └── case-studies.md          # 案例研究
+├── 09-course-operation/         # 小学期课程运行规则
+│   ├── README.md                # 课程协作入口
+│   ├── git-workflow.md          # Git 分支、提交、PR/MR 规则
+│   ├── issue-rules.md           # Issue 求助与 Bug 规范
+│   ├── sprint-checklist.md      # Sprint 交付与验收清单
+│   ├── assessment.md            # 考核与证据说明
+│   ├── teacher-guide.md         # 教师运行建议
+│   └── templates/               # Issue、站会、评审模板
+├── skills/                      # Agent Skill
+│   └── aiguard-knowledge/       # AI-Guard 知识助手 Skill
+└── CHANGELOG.md                 # 更新日志
 ```
 
 ## 阅读建议
+
+### 小学期学生快速路径
+
+1. 先读 [09-course-operation/README.md](09-course-operation/README.md)，确认课程协作规则。
+2. 按 [09-course-operation/git-workflow.md](09-course-operation/git-workflow.md) 切换到本组分支。
+3. 遇到问题按 [09-course-operation/issue-rules.md](09-course-operation/issue-rules.md) 提交 Issue。
+4. 再根据本人角色阅读下方技术资料路径。
 
 ### 按角色阅读
 
@@ -76,7 +107,7 @@ aiguard-reference-kit/
 | 嵌入式开发 | 00 → 01 → 02 → 03/hardware-platform → 04 → 06 → 07 |
 | AI/应用开发 | 00 → 01 → 02 → 03/ai → 03/smart-home → 05 → 07 |
 | 全栈开发 | 00 → 01 → 02 → 按需选择各模块深入 |
-| 项目经理/Scrum Master | 00 → 01 → 02 → 重点关注敏捷实践部分 |
+| 项目经理/Scrum Master | 00 → 01 → 02 → 09 → 重点关注敏捷实践和课程协作部分 |
 
 ### 阅读阶段
 
@@ -90,6 +121,7 @@ aiguard-reference-kit/
    - 刷固件、固件版本问题 → `06-firmware/`（固件通过 Gitee Release 下载，见下方「固件获取」）
    - 遇到错误需要排查 → `07-troubleshooting/`（按 环境/网络/后端/前端/硬件 分层排查 + FAQ）
    - 找工具、教程、社区 → `08-additional-resources/`
+   - 课程 Git / Issue / Sprint / 考核规则 → `09-course-operation/`
 
 ## Skill 安装说明
 
@@ -112,6 +144,7 @@ https://gitee.com/Catherine618/aiguard-reference-kit
 ### 重要说明
 
 - **必须获取完整仓库**：Skill 通过相对路径引用资料包中的文档，只复制 Skill 目录会导致文档引用失效
+- **新增课程目录不影响 Skill 安装**：`09-course-operation/` 是课程协作规则目录，保留完整仓库结构即可被 Skill 正常引用
 - **固件单独下载**：固件二进制文件不包含在仓库中，请从 [https://gitee.com/Catherine618/aiguard-reference-kit/releases](https://gitee.com/Catherine618/aiguard-reference-kit/releases) 页面下载
 - **支持多平台**：Skill 兼容 trae / claude-code / cursor / codex-cli 等 Agent 平台
 
