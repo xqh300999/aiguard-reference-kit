@@ -1,0 +1,29 @@
+name: 文档改进
+description: 反馈文档缺失、不清楚、链接失效或模板改进建议
+title: "【文档改进】请说明文档问题"
+labels: ["类型：文档改进"]
+body:
+  - type: input
+    id: file
+    attributes:
+      label: 文档位置
+      placeholder: 例如：05-protocols/mqtt-topics.md
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题说明
+      description: 哪里不清楚、缺失、过期或链接失效？
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 改进建议
+      description: 如果有建议写法或补充材料，可以写在这里。
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影响范围
+      description: 这个文档问题影响哪些角色或任务？

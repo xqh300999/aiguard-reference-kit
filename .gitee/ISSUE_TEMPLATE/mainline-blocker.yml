@@ -1,0 +1,56 @@
+name: 主链路阻塞
+description: SOS 主链路、多人联调或 Sprint 验收被阻塞
+title: "【主链路阻塞】请说明阻塞点"
+labels: ["类型：主链路阻塞", "优先级：P0主链路阻塞", "状态：需要协助"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本模板用于 SOS 主链路、数据库、后端接收、报警展示、状态流转等 P0 阻塞问题。
+  - type: input
+    id: group
+    attributes:
+      label: 小组
+      placeholder: 例如：A组/安全守护组
+    validations:
+      required: true
+  - type: textarea
+    id: blocked_flow
+    attributes:
+      label: 被阻塞的链路
+      description: 例如：MQTTX 发布 SOS 后，后端无法收到；或后端已入库但社区端无法展示。
+    validations:
+      required: true
+  - type: textarea
+    id: current_state
+    attributes:
+      label: 当前已验证到哪一步
+      placeholder: |
+        1. MQTTX 连接 broker 正常/异常：
+        2. Topic 与 Payload：
+        3. 后端日志：
+        4. 数据库记录：
+        5. 前端/移动端表现：
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 关键证据
+      description: 贴日志、截图、接口响应、数据库记录或测试结果。
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: 已尝试排查
+      description: 已经尝试过哪些方向？结果是什么？
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影响范围
+      description: 影响哪些成员、模块、演示或 Sprint 验收？
+    validations:
+      required: true

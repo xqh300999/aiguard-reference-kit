@@ -1,0 +1,93 @@
+name: 技术求助
+description: 环境、联调、代码、配置、工具使用等技术问题
+title: "【技术求助】请简要说明问题"
+labels: ["类型：技术求助", "状态：信息待补充"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请尽量提供目标、现象、复现步骤和日志。信息越完整，越容易定位问题。
+  - type: input
+    id: group
+    attributes:
+      label: 小组
+      placeholder: 例如：A组/安全守护组
+    validations:
+      required: true
+  - type: dropdown
+    id: module
+    attributes:
+      label: 模块
+      options:
+        - Git
+        - MQTT
+        - 后端
+        - 数据库
+        - 前端
+        - 鸿蒙
+        - 硬件
+        - HomeAssistant
+        - AI
+        - 测试
+        - 其他
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级
+      options:
+        - P0：主链路阻塞
+        - P1：关键功能受阻
+        - P2：一般缺陷
+        - P3：优化建议
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标
+      description: 原本想完成什么？
+    validations:
+      required: true
+  - type: textarea
+    id: symptom
+    attributes:
+      label: 现象
+      description: 现在发生了什么？请贴关键报错、日志或截图说明。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: 已尝试方法
+      description: 已经查过或试过什么？
+    validations:
+      required: true
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: 初步判断
+      description: 你认为问题可能在哪一层？环境、网络、后端、前端、硬件，或其他？
+  - type: textarea
+    id: impact
+    attributes:
+      label: 影响范围
+      description: 是否阻塞 SOS 主链路？是否影响多人？
+    validations:
+      required: true
+  - type: textarea
+    id: help
+    attributes:
+      label: 期望协助
+      description: 希望同学、助教或导师帮你判断什么？

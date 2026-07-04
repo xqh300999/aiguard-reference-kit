@@ -1,0 +1,38 @@
+name: 经验分享
+description: 沉淀可复用的排查方法、脚本、测试集合或优秀做法
+title: "【经验分享】请简要说明经验"
+labels: ["类型：经验分享", "状态：FAQ候选"]
+body:
+  - type: input
+    id: group
+    attributes:
+      label: 小组或贡献者
+      placeholder: 例如：D组/AI智慧组/姓名
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 适用场景
+      description: 这个经验适合解决什么问题？
+    validations:
+      required: true
+  - type: textarea
+    id: method
+    attributes:
+      label: 方法或步骤
+      description: 写清楚可复用步骤、命令、脚本或注意事项。
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 验证证据
+      description: 如何证明这个方法有效？可以贴日志、截图、测试结果或链接。
+    validations:
+      required: true
+  - type: textarea
+    id: faq
+    attributes:
+      label: 是否适合进入 FAQ
+      description: 如果适合，请说明建议放到哪个文档或章节。

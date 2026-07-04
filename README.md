@@ -24,12 +24,13 @@ AiGuard 参考资料包是一套面向智能家居养老看护系统开发的学
 4. [09-course-operation/sprint-checklist.md](09-course-operation/sprint-checklist.md)：每个 Sprint 的交付物与验收清单
 5. [09-course-operation/assessment.md](09-course-operation/assessment.md)：课程评价与过程证据说明
 
-> 注意：`main` 分支由教师维护，用于发布资料、模板和稳定说明。学生小组请在各自小组分支开展开发与文档维护，例如 `team-a/dev`、`team-b/dev`、`team-c/dev`、`team-d/dev`。不要直接向 `main` 提交课程代码。
+> 注意：`main` 分支建议用于发布资料、模板和稳定说明。学生小组可在各自小组分支开展开发与文档维护，例如 `team-a/dev`、`team-b/dev`、`team-c/dev`、`team-d/dev`。日常课程代码建议先提交到小组分支。
 
 ## 知识地图
 
 ```
 aiguard-reference-kit/
+├── .gitee/ISSUE_TEMPLATE/       # Gitee Issue 表单模板
 ├── 00-getting-started/          # 入门指南
 │   ├── prerequisites.md         # 开发环境依赖
 │   ├── learning-path.md         # 分角色学习路径
@@ -82,7 +83,7 @@ aiguard-reference-kit/
 │   ├── issue-rules.md           # Issue 求助与 Bug 规范
 │   ├── sprint-checklist.md      # Sprint 交付与验收清单
 │   ├── assessment.md            # 考核与证据说明
-│   ├── teacher-guide.md         # 教师运行建议
+│   ├── support-mechanism.md     # 协作支持机制
 │   └── templates/               # Issue、站会、评审模板
 ├── skills/                      # Agent Skill
 │   └── aiguard-knowledge/       # AI-Guard 知识助手 Skill

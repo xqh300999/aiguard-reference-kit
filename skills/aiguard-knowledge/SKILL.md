@@ -65,7 +65,7 @@ Agent会自动clone整个仓库并识别 skills/aiguard-knowledge/ 目录中的S
 | `06-firmware/` | 小智固件、刷写工具、驱动说明 | 刷固件、固件版本问题 |
 | `07-troubleshooting/` | 分层故障排查指南、FAQ | 遇到问题需要排查时 |
 | `08-additional-resources/` | 推荐工具、教程、社区链接 | 找工具、找教程、找社区 |
-| `09-course-operation/` | Git协作、Issue规则、Sprint验收、考核说明、教师运行建议 | 学生协作、提问、考核与课堂执行 |
+| `09-course-operation/` | Git协作、Issue规则、Sprint验收、考核说明、协作支持机制 | 学生协作、提问、考核与课堂执行 |
 
 ## 工作流程
 

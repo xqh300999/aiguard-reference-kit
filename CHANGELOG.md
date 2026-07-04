@@ -7,11 +7,13 @@
 ### 新增
 - 新增 `09-course-operation/` 小学期课程运行规则目录：
   - Git 分支、提交、PR/MR 与 Issue 关联规则
-  - Issue 技术求助、Bug 报告、教师介入和关闭规范
+  - Issue 技术求助、Bug 报告、协作支持和关闭规范
   - Sprint 0-3 与终期验收清单
   - 课程考核与过程证据说明
-  - 教师运行建议
+  - 协作支持机制
   - 技术求助、Bug、每日站会、Sprint 评审模板
+- 新增 `.gitee/ISSUE_TEMPLATE/` 表单式 Issue 模板：
+  - 技术求助、Bug 反馈、主链路阻塞、功能建议、文档改进、经验分享
 
 ### 变更
 - 更新根 `README.md`，增加“小学期课程协作入口”和 `09-course-operation/` 知识地图。
