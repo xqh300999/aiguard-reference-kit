@@ -1,0 +1,10 @@
+export class Constants {
+  static readonly APP_NAME: string = 'AiGuard';
+
+  // 后端完成后：把 USE_MOCK 改为 false，并把 API_BASE_URL 改成后端地址，例如 http://192.168.1.100:8080
+  // SOS 实时接收优先切换为 WebSocket：WS /ws/alerts?token=<JWT_TOKEN>
+  static readonly API_BASE_URL: string = '';
+  static readonly USE_MOCK: boolean = true;
+  static readonly ENABLE_MOCK_SOS_PUSH: boolean = true;
+  static readonly MOCK_SOS_DELAY: number = 5000;
+}
