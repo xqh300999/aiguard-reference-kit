@@ -1,0 +1,11 @@
+{
+  "src": [
+    "pages/Login",
+    "pages/FamilyHome",
+    "pages/ElderlyProfile",
+    "pages/AlertList",
+    "pages/AlertDetail",
+    "pages/SosAlert",
+    "pages/PersonalCenter"
+  ]
+}
