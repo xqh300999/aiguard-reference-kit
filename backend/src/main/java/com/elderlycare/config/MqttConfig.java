@@ -25,8 +25,10 @@ import org.springframework.messaging.MessageHandler;
  *   <li>设备心跳：aiguard/v1/+/+/health/heartbeat — QoS 1</li>
  * </ul>
  * 断线自动重连：MqttConnectOptions.setAutomaticReconnect(true)
+ * 
+ * TODO: 本地开发环境需要安装并启动 MQTT Broker (Mosquitto/EMQX) 后才能启用此配置
  */
-@Configuration
+// @Configuration  // 临时禁用，等待 MQTT Broker 部署后启用
 public class MqttConfig {
 
     private static final Logger log = LoggerFactory.getLogger(MqttConfig.class);

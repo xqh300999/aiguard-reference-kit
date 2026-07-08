@@ -1,1 +1,8 @@
 com\elderlycare\Application.class
+com\elderlycare\mapper\StatsMapper.class
+com\elderlycare\controller\StatsController.class
+com\elderlycare\model\dto\StatsOverviewDTO.class
+com\elderlycare\common\Result.class
+com\elderlycare\config\MqttConfig.class
+com\elderlycare\service\impl\StatsServiceImpl.class
+com\elderlycare\service\StatsService.class
