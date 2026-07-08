@@ -1,39 +1,44 @@
 package com.elderlycare.common;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
-/**
- * 统一 API 返回格式
- * <p>遵循团队开发规范 §1.1：{ code, message, data, ts }
- */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Result<T> {
 
     private int code;
     private String message;
     private T data;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING)
-    private Instant ts;
+    private long ts;
 
     public static <T> Result<T> success(T data) {
-        Result<T> r = new Result<>();
-        r.code = 0;
-        r.message = "success";
-        r.data = data;
-        r.ts = Instant.now();
-        return r;
+        return Result.<T>builder()
+                .code(0)
+                .message("success")
+                .data(data)
+                .ts(System.currentTimeMillis())
+                .build();
     }
 
+    public static <T> Result<T> error(String message) {
+        return Result.<T>builder()
+                .code(-1)
+                .message(message)
+                .ts(System.currentTimeMillis())
+                .build();
+    }
+
+    // ========== 以下为新增：支持自定义错误码 ==========
     public static <T> Result<T> error(int code, String message) {
-        Result<T> r = new Result<>();
-        r.code = code;
-        r.message = message;
-        r.data = null;
-        r.ts = Instant.now();
-        return r;
+        return Result.<T>builder()
+                .code(code)
+                .message(message)
+                .ts(System.currentTimeMillis())
+                .build();
     }
 }
