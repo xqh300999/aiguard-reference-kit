@@ -81,7 +81,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getUsers, createUser, updateUser, deleteUser, getCommunities } from '@/api'
-import type { User, Community } from '@/types'
+import type { User, Community } from '@/types/api'
 
 const tableData = ref<User[]>([])
 const communities = ref<Community[]>([])
@@ -137,7 +137,7 @@ const fetchData = async () => {
     total.value = data.total
   } catch {
     tableData.value = [
-      { id: 1, username: 'admin', realName: '管理员', phone: '', role: 'ADMIN', communityId: null, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
+      { id: 1, username: 'admin', realName: '管理员', phone: '', role: 'ADMIN', communityId: undefined, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
       { id: 2, username: 'worker1', realName: '张三', phone: '13800138000', role: 'WORKER', communityId: 1, communityName: '幸福社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
       { id: 3, username: 'worker2', realName: '李四', phone: '13800138001', role: 'WORKER', communityId: 2, communityName: '阳光社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
       { id: 4, username: 'family1', realName: '王五', phone: '13800138002', role: 'FAMILY', communityId: 1, communityName: '幸福社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' }
@@ -189,7 +189,7 @@ const handleSubmit = async () => {
     if (!valid) return
     loading.value = true
     try {
-      const data: Partial<User> & { password?: string } = { realName: form.realName, phone: form.phone, role: form.role, communityId: form.role === 'ADMIN' ? null : form.communityId }
+      const data: Partial<User> & { password?: string } = { realName: form.realName, phone: form.phone, role: form.role, communityId: form.role === 'ADMIN' ? undefined : form.communityId }
       if (form.password) {
         data.password = form.password
       }

@@ -2,10 +2,15 @@ import axios, { type AxiosRequestConfig } from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 import { ElMessage } from 'element-plus'
+import { createMockServer } from '@/mock/server'
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
+
+const mockServer = createMockServer()
 
 const instance = axios.create({
   baseURL: '/api/v1',
-  timeout: 10000
+  timeout: 10000,
 })
 
 instance.interceptors.request.use(
@@ -39,12 +44,46 @@ instance.interceptors.response.use(
   }
 )
 
-type RequestInstance = {
-  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>
-  post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
-  put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
-  delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>
-  patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>
+async function request<T>(method: string, url: string, data?: unknown): Promise<T> {
+  if (USE_MOCK) {
+    const fullUrl = url.startsWith('/api/v1') ? url : `/api/v1${url}`
+    const result = await mockServer.request<T>(method, fullUrl, data)
+    if (result.code !== 0) {
+      ElMessage.error(result.message)
+      return Promise.reject(new Error(result.message))
+    }
+    return result.data
+  }
+
+  return instance({ method, url, data }) as Promise<T>
 }
 
-export default instance as RequestInstance
+export const http = {
+  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    if (USE_MOCK) {
+      return request('GET', url + (config?.params ? '?' + new URLSearchParams(config.params as Record<string, string>).toString() : ''))
+    }
+    return instance.get(url, config)
+  },
+
+  post<T = unknown>(url: string, data?: unknown): Promise<T> {
+    return request('POST', url, data)
+  },
+
+  put<T = unknown>(url: string, data?: unknown): Promise<T> {
+    return request('PUT', url, data)
+  },
+
+  delete<T = unknown>(url: string): Promise<T> {
+    if (USE_MOCK) {
+      return request('DELETE', url)
+    }
+    return instance.delete(url)
+  },
+
+  patch<T = unknown>(url: string, data?: unknown): Promise<T> {
+    return request('PATCH', url, data)
+  },
+}
+
+export default http

@@ -115,7 +115,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getElderlies, createElderly, updateElderly, deleteElderly, getCommunities } from '@/api'
-import type { Elderly, Community } from '@/types'
+import type { Elderly, Community } from '@/types/api'
 
 const tableData = ref<Elderly[]>([])
 const communities = ref<Community[]>([])
@@ -166,10 +166,10 @@ const fetchData = async () => {
     total.value = data.total
   } catch {
     tableData.value = [
-      { id: 1, name: '张三', age: 75, gender: 'MALE', phone: '010-88886666', communityId: 1, communityName: '幸福社区', emergencyContact: '13800138001', healthNotes: '高血压', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', device: { id: 1, name: '手表001', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F6', communityId: 1, elderlyId: 1, status: 'ONLINE', battery: 85, lastHeartbeat: '2026-07-05T09:59:00Z', createdAt: '' } },
-      { id: 2, name: '李四', age: 82, gender: 'FEMALE', phone: '010-88886667', communityId: 1, communityName: '幸福社区', emergencyContact: '13800138002', healthNotes: '', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', device: { id: 2, name: '手表002', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F7', communityId: 1, elderlyId: 2, status: 'ONLINE', battery: 70, lastHeartbeat: '2026-07-05T09:58:00Z', createdAt: '' } },
+      { id: 1, name: '张三', age: 75, gender: 'MALE', phone: '010-88886666', communityId: 1, communityName: '幸福社区', emergencyContact: '13800138001', healthNotes: '高血压', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', device: { id: 1, name: '手表001', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F6', communityId: 1, communityName: '幸福社区', elderlyId: 1, elderlyName: '张三', status: 'ONLINE', battery: 85, lastHeartbeat: '2026-07-05T09:59:00Z', createdAt: '' } },
+      { id: 2, name: '李四', age: 82, gender: 'FEMALE', phone: '010-88886667', communityId: 1, communityName: '幸福社区', emergencyContact: '13800138002', healthNotes: '', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', device: { id: 2, name: '手表002', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F7', communityId: 1, communityName: '幸福社区', elderlyId: 2, elderlyName: '李四', status: 'ONLINE', battery: 70, lastHeartbeat: '2026-07-05T09:58:00Z', createdAt: '' } },
       { id: 3, name: '王五', age: 78, gender: 'MALE', phone: '010-88886668', communityId: 2, communityName: '阳光社区', emergencyContact: '13800138003', healthNotes: '糖尿病', status: 'INACTIVE', createdAt: '2026-07-01T08:00:00Z' },
-      { id: 4, name: '赵六', age: 85, gender: 'FEMALE', phone: '010-88886669', communityId: 3, communityName: '和谐社区', emergencyContact: '13800138004', healthNotes: '心脏病', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', device: { id: 3, name: '手表003', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F8', communityId: 3, elderlyId: 4, status: 'OFFLINE', battery: 20, lastHeartbeat: '2026-07-04T10:00:00Z', createdAt: '' } }
+      { id: 4, name: '赵六', age: 85, gender: 'FEMALE', phone: '010-88886669', communityId: 3, communityName: '和谐社区', emergencyContact: '13800138004', healthNotes: '心脏病', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', device: { id: 3, name: '手表003', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F8', communityId: 3, communityName: '和谐社区', elderlyId: 4, elderlyName: '赵六', status: 'OFFLINE', battery: 20, lastHeartbeat: '2026-07-04T10:00:00Z', createdAt: '' } }
     ]
     total.value = 4
   }

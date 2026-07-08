@@ -45,7 +45,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getCommunities, createCommunity, updateCommunity, deleteCommunity } from '@/api'
-import type { Community } from '@/types'
+import type { Community } from '@/types/api'
 
 const tableData = ref<Community[]>([])
 const dialogVisible = ref(false)

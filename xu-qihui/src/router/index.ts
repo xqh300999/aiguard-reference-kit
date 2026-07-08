@@ -6,7 +6,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login'
+      redirect: '/worker/workbench'
     },
     {
       path: '/login',
@@ -15,7 +15,7 @@ const router = createRouter({
     },
     {
       path: '/admin',
-      component: () => import('@/components/AdminLayout.vue'),
+      component: () => import('@/layouts/AdminLayout.vue'),
       meta: { role: 'ADMIN' },
       redirect: '/admin/dashboard',
       children: [
@@ -48,6 +48,34 @@ const router = createRouter({
           path: 'alerts',
           name: 'Alerts',
           component: () => import('@/views/AlertMgt.vue')
+        },
+        {
+          path: 'alerts/:id',
+          name: 'AlertDetail',
+          component: () => import('@/views/AlertDetailView.vue')
+        }
+      ]
+    },
+    {
+      path: '/worker',
+      component: () => import('@/layouts/WorkerLayout.vue'),
+      meta: { role: 'WORKER' },
+      redirect: '/worker/workbench',
+      children: [
+        {
+          path: 'workbench',
+          name: 'Workbench',
+          component: () => import('@/views/WorkbenchView.vue')
+        },
+        {
+          path: 'alerts/:id',
+          name: 'WorkerAlertDetail',
+          component: () => import('@/views/AlertDetailView.vue')
+        },
+        {
+          path: 'alerts',
+          name: 'WorkerAlerts',
+          component: () => import('@/views/AlertMgt.vue')
         }
       ]
     }
@@ -57,19 +85,28 @@ const router = createRouter({
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore()
   authStore.init()
+
   if (!authStore.token) {
     if (to.path === '/login') {
       next()
     } else {
       next('/login')
     }
-  } else {
-    if (to.path === '/login') {
-      next('/admin/dashboard')
-    } else {
-      next()
-    }
+    return
   }
+
+  if (to.path === '/login') {
+    next('/worker/workbench')
+    return
+  }
+
+  const requiredRole = to.meta.role as string | undefined
+  if (requiredRole && authStore.user?.role !== requiredRole && authStore.user?.role !== 'ADMIN') {
+    next('/worker/workbench')
+    return
+  }
+
+  next()
 })
 
 export default router

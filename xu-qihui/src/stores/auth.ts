@@ -1,24 +1,16 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-
-export interface User {
-  id: number
-  username: string
-  realName: string
-  role: 'ADMIN' | 'WORKER' | 'FAMILY' | 'ELDERLY'
-  communityId: number | null
-  communityName?: string
-}
+import type { UserSession } from '@/types/api'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
+  const user = ref<UserSession | null>(null)
   const token = ref<string>('')
 
-  const login = (data: { user: User; token: string }) => {
-    user.value = data.user
+  const login = (data: UserSession) => {
+    user.value = data
     token.value = data.token
     localStorage.setItem('token', data.token)
-    localStorage.setItem('user', JSON.stringify(data.user))
+    localStorage.setItem('user', JSON.stringify(data))
   }
 
   const logout = () => {

@@ -24,7 +24,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getStatsOverview } from '@/api'
-import type { StatsOverview } from '@/types'
+import type { StatsOverview } from '@/types/api'
 
 const stats = ref<StatsOverview>({
   totalElderly: 0,

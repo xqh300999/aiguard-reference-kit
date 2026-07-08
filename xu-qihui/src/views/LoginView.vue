@@ -19,7 +19,7 @@
               登录
             </el-button>
           </el-form-item>
-          <p style="margin: 12px 0 0; color: #768198; font-size: 13px;">测试账号：admin/admin 或 worker/123456</p>
+          <p style="margin: 12px 0 0; color: #768198; font-size: 13px;">测试账号：admin/admin123 或 worker/worker123</p>
         </el-form>
       </section>
     </div>
@@ -32,6 +32,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import { login } from '@/api/auth'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -55,25 +56,12 @@ const handleLogin = async () => {
     if (!valid) return
     loading.value = true
     try {
-      if (form.username === 'admin' && form.password === 'admin') {
-        authStore.login({
-          user: { id: 1, username: 'admin', realName: '管理员', role: 'ADMIN', communityId: null },
-          token: 'mock-token-admin'
-        })
-        router.push(authStore.user?.role === 'WORKER' ? '/admin/communities' : '/admin/dashboard')
-        ElMessage.success('登录成功')
-      } else if (form.username === 'worker' && form.password === '123456') {
-        authStore.login({
-          user: { id: 2, username: 'worker', realName: '社区工作人员', role: 'WORKER', communityId: 1, communityName: '幸福社区' },
-          token: 'mock-token-worker'
-        })
-        router.push(authStore.user?.role === 'WORKER' ? '/admin/communities' : '/admin/dashboard')
-        ElMessage.success('登录成功')
-      } else {
-        ElMessage.error('用户名或密码错误')
-      }
+      const data = await login(form)
+      authStore.login(data)
+      router.push('/worker/workbench')
+      ElMessage.success('登录成功')
     } catch {
-      ElMessage.error('登录失败')
+      ElMessage.error('用户名或密码错误')
     } finally {
       loading.value = false
     }
@@ -83,7 +71,7 @@ const handleLogin = async () => {
 onMounted(() => {
   authStore.init()
   if (authStore.token) {
-    router.push(authStore.user?.role === 'WORKER' ? '/admin/communities' : '/admin/dashboard')
+    router.push('/worker/workbench')
   }
 })
 </script>

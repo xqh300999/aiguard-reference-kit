@@ -84,7 +84,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getAlerts, updateAlert, getCommunities } from '@/api'
-import type { Alert, Community } from '@/types'
+import type { AlertRecord as Alert, Community } from '@/types/api'
 
 const tableData = ref<Alert[]>([])
 const communities = ref<Community[]>([])
@@ -93,9 +93,9 @@ const page = ref(1)
 const size = ref(10)
 
 const searchForm = reactive({
-  status: '',
-  type: '',
-  communityId: ''
+  status: '' as '',
+  type: '' as '',
+  communityId: '' as ''
 })
 
 const getTypeText = (type: Alert['type']) => {
@@ -165,10 +165,10 @@ const fetchData = async () => {
     total.value = data.total
   } catch {
     tableData.value = [
-      { id: 1, type: 'SOS', typeName: '紧急求助', elderlyId: 1, elderlyName: '张三', communityId: 1, communityName: '幸福社区', status: 'PENDING', statusName: '待处理', priority: 'HIGH', happenedAt: '2026-07-05T10:30:00Z' },
-      { id: 2, type: 'SOS', typeName: '紧急求助', elderlyId: 2, elderlyName: '李四', communityId: 1, communityName: '幸福社区', status: 'PROCESSING', statusName: '处理中', priority: 'HIGH', handlerId: 2, handlerName: '社区工作人员', happenedAt: '2026-07-05T10:25:00Z' },
+      { id: 1, type: 'SOS', typeName: '紧急求助', elderlyId: 1, elderlyName: '张三', communityId: 1, communityName: '幸福社区', status: 'PENDING', statusName: '待处理', priority: 'HIGH', handlerId: null, handlerName: null, happenedAt: '2026-07-05T10:30:00Z', resolvedAt: null },
+      { id: 2, type: 'SOS', typeName: '紧急求助', elderlyId: 2, elderlyName: '李四', communityId: 1, communityName: '幸福社区', status: 'PROCESSING', statusName: '处理中', priority: 'HIGH', handlerId: 2, handlerName: '社区工作人员', happenedAt: '2026-07-05T10:25:00Z', resolvedAt: null },
       { id: 3, type: 'FALL', typeName: '跌倒检测', elderlyId: 3, elderlyName: '王五', communityId: 2, communityName: '阳光社区', status: 'RESOLVED', statusName: '已解决', priority: 'HIGH', handlerId: 3, handlerName: '社区工作人员', happenedAt: '2026-07-05T10:20:00Z', resolvedAt: '2026-07-05T10:35:00Z' },
-      { id: 4, type: 'DEVICE_OFFLINE', typeName: '设备离线', elderlyId: 4, elderlyName: '赵六', communityId: 3, communityName: '和谐社区', status: 'PENDING', statusName: '待处理', priority: 'MEDIUM', happenedAt: '2026-07-05T10:15:00Z' }
+      { id: 4, type: 'DEVICE_OFFLINE', typeName: '设备离线', elderlyId: 4, elderlyName: '赵六', communityId: 3, communityName: '和谐社区', status: 'PENDING', statusName: '待处理', priority: 'MEDIUM', handlerId: null, handlerName: null, happenedAt: '2026-07-05T10:15:00Z', resolvedAt: null }
     ]
     total.value = 4
   }

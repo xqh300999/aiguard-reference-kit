@@ -85,7 +85,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance } from 'element-plus'
 import { getDevices, bindDevice, unbindDevice, getCommunities, getElderlies } from '@/api'
-import type { Device, Community, Elderly } from '@/types'
+import type { Device, Community, Elderly } from '@/types/api'
 
 const tableData = ref<Device[]>([])
 const communities = ref<Community[]>([])
@@ -157,8 +157,8 @@ const fetchAvailableElderlies = async (communityId: number) => {
     availableElderlies.value = data.records.filter((e: Elderly) => !e.deviceId)
   } catch {
     availableElderlies.value = [
-      { id: 5, name: '赵六', age: 80, gender: 'MALE', communityId: communityId, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
-      { id: 6, name: '孙七', age: 76, gender: 'FEMALE', communityId: communityId, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' }
+      { id: 5, name: '赵六', age: 80, gender: 'MALE', phone: '', communityId: communityId, communityName: '', emergencyContact: '', healthNotes: '', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
+      { id: 6, name: '孙七', age: 76, gender: 'FEMALE', phone: '', communityId: communityId, communityName: '', emergencyContact: '', healthNotes: '', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' }
     ]
   }
 }
