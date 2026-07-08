@@ -6,3 +6,7 @@ spring:
 
 jwt:
   secret: my-local-dev-secret-key-2026
+
+mqtt:
+  username: dev
+  password: dev123
