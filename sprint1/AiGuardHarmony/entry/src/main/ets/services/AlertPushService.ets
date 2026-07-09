@@ -16,9 +16,9 @@ export class AlertPushService {
       return;
     }
 
-    // 后端完成后，这里可替换为 WebSocket：
+    // 后端完成后，这里替换为接口文档中的实时告警通道：
     // WS /ws/alerts?token=<JWT_TOKEN>
-    // WebSocket 暂未实现时，可先使用轮询：
+    // WebSocket 暂未完成时，可临时轮询：
     // GET /api/v1/alerts?type=SOS&status=PENDING&page=1&size=20
     AlertPushService.timerId = setTimeout(() => {
       let result: Result<Alert> = MockService.mockReceiveSosAlert();

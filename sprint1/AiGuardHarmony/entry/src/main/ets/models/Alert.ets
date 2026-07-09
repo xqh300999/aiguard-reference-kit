@@ -1,11 +1,3 @@
-export interface CreateAlertRequest {
-  type: 'SOS';
-  elderlyId: number;
-  source: 'APP';
-  lat: null;
-  lng: null;
-}
-
 export interface Alert {
   id: number;
   type: string;
@@ -25,6 +17,7 @@ export interface Alert {
   lat?: number;
   lng?: number;
   source?: string;
+  notificationId?: number;
 }
 
 export interface AlertPage {

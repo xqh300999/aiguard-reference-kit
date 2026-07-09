@@ -5,7 +5,7 @@ import { Alert, AlertPage } from '../models/Alert';
 import { Elderly } from '../models/Elderly';
 import { Result } from '../models/Result';
 import { User } from '../models/User';
-import { FamilyHomeData, MockService } from './MockService';
+import { FamilyHomeData, MockService, UnreadCountData } from './MockService';
 
 type RequestData = string | number | boolean | object | null;
 
@@ -21,14 +21,19 @@ interface LoginRequest {
 
 export class ApiService {
   private static readonly SUCCESS_CODE: number = 0;
+  private static readonly PATCH_METHOD: http.RequestMethod = 'PATCH' as http.RequestMethod;
 
-  // 后端完成后：USE_MOCK=false，并填写 Constants.API_BASE_URL。
-  // 登录：POST /api/v1/auth/login
-  // 老人详情：GET /api/v1/elderly/{id}
-  // 老人告警历史：GET /api/v1/elderly/{id}/alerts?page=1&size=20
-  // 告警详情：GET /api/v1/alerts/{id}
-  // SOS 实时接收：WS /ws/alerts?token=<JWT_TOKEN>；WebSocket 未完成时可轮询：
-  // GET /api/v1/alerts?type=SOS&status=PENDING&page=1&size=20
+  // 后端完成后：
+  // 1. Constants.USE_MOCK 改为 false。
+  // 2. Constants.API_BASE_URL 改为后端地址，例如 http://192.168.1.100:8080。
+  // 3. 本文件只使用接口文档中已有接口：
+  //    POST /api/v1/auth/login
+  //    GET  /api/v1/elderly/{id}
+  //    GET  /api/v1/elderly/{id}/alerts?page=1&size=20
+  //    GET  /api/v1/alerts/{id}
+  //    GET  /api/v1/notifications/unread-count?userId={userId}
+  //    PATCH /api/v1/notifications/{id}/read
+  // 4. SOS 实时接收后续替换为：WS /ws/alerts?token=<JWT_TOKEN>。
 
   static isSuccess<T>(result: Result<T>): boolean {
     return result.code === ApiService.SUCCESS_CODE;
@@ -45,47 +50,47 @@ export class ApiService {
     return ApiService.post<User>('/api/v1/auth/login', body, false);
   }
 
-  static async getFamilyHome(elderlyId: number): Promise<Result<FamilyHomeData>> {
+  static async getFamilyHome(elderlyId: number, userId: number): Promise<Result<FamilyHomeData>> {
     if (Constants.USE_MOCK) {
       return Promise.resolve(MockService.mockGetFamilyHome());
     }
 
-    // 接口文档没有“家人首页聚合接口”，真实模式下用已存在接口组合：
-    // 老人详情：GET /api/v1/elderly/{id}
-    // 告警列表：GET /api/v1/alerts?page=1&size=20
+    // 接口文档没有单独的家人端首页接口，真实模式下由老人详情 + 告警历史 + 未读数聚合。
     let elderlyResult = await ApiService.get<Elderly>(`/api/v1/elderly/${elderlyId}`, true);
     if (!ApiService.isSuccess<Elderly>(elderlyResult) || elderlyResult.data === null) {
       return ApiService.buildErrorResult<FamilyHomeData>(elderlyResult.code, elderlyResult.message);
     }
 
-    let alertResult = await ApiService.getAlertList(1, 20);
+    let alertResult = await ApiService.getElderlyAlertList(elderlyId, 1, 20);
     let latestAlert = MockService.emptyAlert();
-    let unreadCount = 0;
     if (ApiService.isSuccess<AlertPage>(alertResult) && alertResult.data !== null && alertResult.data.records.length > 0) {
       latestAlert = alertResult.data.records[0];
-      unreadCount = alertResult.data.total;
     }
 
-    let data: FamilyHomeData = {
-      elderly: elderlyResult.data,
-      device: elderlyResult.data.device,
-      latestAlert: latestAlert,
-      unreadCount: unreadCount
-    };
-    let result: Result<FamilyHomeData> = {
+    let unreadResult = await ApiService.getUnreadAlertCount(userId);
+    let unreadCount = 0;
+    if (ApiService.isSuccess<UnreadCountData>(unreadResult) && unreadResult.data !== null) {
+      unreadCount = unreadResult.data.unreadCount;
+    }
+
+    return {
       code: 0,
       message: 'success',
-      data: data,
+      data: {
+        elderly: elderlyResult.data,
+        device: elderlyResult.data.device,
+        latestAlert: latestAlert,
+        unreadCount: unreadCount
+      },
       ts: ''
     };
-    return result;
   }
 
-  static getAlertList(page: number = 1, pageSize: number = 20): Promise<Result<AlertPage>> {
+  static getElderlyAlertList(elderlyId: number, page: number = 1, pageSize: number = 20): Promise<Result<AlertPage>> {
     if (Constants.USE_MOCK) {
       return Promise.resolve(MockService.mockGetAlertList());
     }
-    return ApiService.get<AlertPage>(`/api/v1/alerts?page=${page}&size=${pageSize}`, true);
+    return ApiService.get<AlertPage>(`/api/v1/elderly/${elderlyId}/alerts?page=${page}&size=${pageSize}`, true);
   }
 
   static getAlertDetail(alertId: number): Promise<Result<Alert>> {
@@ -102,6 +107,20 @@ export class ApiService {
     return ApiService.get<Elderly>(`/api/v1/elderly/${elderlyId}`, true);
   }
 
+  static getUnreadAlertCount(userId: number): Promise<Result<UnreadCountData>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockGetUnreadCount());
+    }
+    return ApiService.get<UnreadCountData>(`/api/v1/notifications/unread-count?userId=${userId}`, true);
+  }
+
+  static markNotificationRead(notificationId: number): Promise<Result<UnreadCountData>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockMarkNotificationRead(notificationId));
+    }
+    return ApiService.patch<UnreadCountData>(`/api/v1/notifications/${notificationId}/read`, null, true);
+  }
+
   static get<T>(path: string, needAuth: boolean = true): Promise<Result<T>> {
     return ApiService.request<T>(http.RequestMethod.GET, path, null, needAuth);
   }
@@ -115,8 +134,9 @@ export class ApiService {
   }
 
   static patch<T>(path: string, data: RequestData, needAuth: boolean = true): Promise<Result<T>> {
-    // 部分 HarmonyOS SDK 的 RequestMethod 不提供 PATCH 枚举；后端联调状态流转接口时再按实际 SDK 能力切换。
-    return ApiService.request<T>(http.RequestMethod.PUT, path, data, needAuth);
+    // 部分 HarmonyOS SDK 没有 http.RequestMethod.PATCH 枚举，接口文档又要求 PATCH，
+    // 因此这里使用字符串兼容写法，页面仍统一调用 ApiService。
+    return ApiService.request<T>(ApiService.PATCH_METHOD, path, data, needAuth);
   }
 
   static delete<T>(path: string, needAuth: boolean = true): Promise<Result<T>> {
@@ -150,13 +170,12 @@ export class ApiService {
   }
 
   private static buildErrorResult<T>(code: number, message: string): Result<T> {
-    let result: Result<T> = {
+    return {
       code: code,
       message: message,
       data: null,
       ts: ''
     };
-    return result;
   }
 
   private static async request<T>(
