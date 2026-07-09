@@ -1,0 +1,4 @@
+1 ESP-IDF v5.5.2 + LVGL 9.x，7 寸屏驱动 RGB565/8080，触摸初始化
+2 WiFi + MQTT：连 Mosquitto，订阅 aiguard/v1/+/alert/sos
+3 SOS 弹窗：全屏红色(类型+老人名+时间)，200ms 顶滑入，点击/5min 关闭，多次叠加最新置顶
+4 片区概览雏形：标题栏+NTP 时间，2x2 老人卡片(Mock)
