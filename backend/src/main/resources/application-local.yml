@@ -8,10 +8,10 @@ jwt:
   secret: my-local-dev-secret-key-2026
 
 mqtt:
-  broker-url: tcp://localhost:1883
+  broker-url: tcp://192.168.3.19:1883
   client-id: aiguard-backend-local
-  username: dev
-  password: dev123
+  username: Team_c
+  password: 147258369
   keep-alive: 60
   connection-timeout: 30
   completion-timeout: 5000
