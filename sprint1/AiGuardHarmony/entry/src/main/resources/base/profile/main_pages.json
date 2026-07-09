@@ -1,7 +1,10 @@
 {
   "src": [
     "pages/Login",
+    "pages/Register",
     "pages/FamilyHome",
+    "pages/BindElderly",
+    "pages/ElderlyEdit",
     "pages/ElderlyProfile",
     "pages/AlertList",
     "pages/AlertDetail",

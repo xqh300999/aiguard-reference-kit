@@ -1,8 +1,8 @@
 import { Alert, AlertPage } from '../models/Alert';
 import { Device } from '../models/Device';
-import { Elderly } from '../models/Elderly';
+import { Elderly, ElderlyForm, ElderlySearchItem } from '../models/Elderly';
 import { Result } from '../models/Result';
-import { User } from '../models/User';
+import { BindByContactRequest, RegisterFamilyRequest, User, UserAccount } from '../models/User';
 
 const MOCK_TS: string = '2026-07-05T10:00:00Z';
 const SOS_TS: string = '2026-07-05T10:30:00Z';
@@ -19,6 +19,17 @@ export interface UnreadCountData {
 }
 
 export class MockService {
+  static emptyDevice(): Device {
+    return {
+      id: 0,
+      name: '未绑定设备',
+      type: '',
+      status: 'UNKNOWN',
+      battery: 0,
+      lastHeartbeat: ''
+    };
+  }
+
   static emptyAlert(): Alert {
     return {
       id: 0,
@@ -161,6 +172,23 @@ export class MockService {
       };
     }
 
+    if (username === 'newfamily') {
+      return {
+        code: 0,
+        message: 'success',
+        data: {
+          token: 'mock-new-family-token',
+          userId: 1002,
+          role: 'FAMILY',
+          realName: '李小华',
+          elderlyId: null,
+          communityId: 1,
+          communityName: '幸福社区'
+        },
+        ts: MOCK_TS
+      };
+    }
+
     return {
       code: 0,
       message: 'success',
@@ -173,6 +201,48 @@ export class MockService {
         elderlyName: '王大爷',
         communityId: 1,
         communityName: '幸福社区'
+      },
+      ts: MOCK_TS
+    };
+  }
+
+  static mockRegisterFamily(request: RegisterFamilyRequest): Result<UserAccount> {
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        id: 1002,
+        username: request.username,
+        realName: request.realName,
+        phone: request.phone,
+        role: 'FAMILY',
+        communityId: request.communityId,
+        status: 'ENABLED'
+      },
+      ts: MOCK_TS
+    };
+  }
+
+  static mockBindElderlyByContact(userId: number, request: BindByContactRequest): Result<UserAccount> {
+    if (request.name.length === 0 || request.phone.length === 0) {
+      return {
+        code: 400,
+        message: '未找到匹配的老人，请检查姓名和电话',
+        data: null,
+        ts: MOCK_TS
+      };
+    }
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        id: userId,
+        username: 'family',
+        realName: '王小明',
+        role: 'FAMILY',
+        communityId: 1,
+        elderlyId: 1,
+        status: 'ENABLED'
       },
       ts: MOCK_TS
     };
@@ -265,6 +335,72 @@ export class MockService {
       code: 0,
       message: 'success',
       data: MockService.buildElderly(),
+      ts: MOCK_TS
+    };
+  }
+
+  static mockRegisterElderly(request: ElderlyForm): Result<Elderly> {
+    let elderly: Elderly = {
+      id: 5,
+      name: request.name,
+      age: request.age ?? 0,
+      gender: request.gender,
+      address: request.address ?? '',
+      phone: request.phone,
+      emergencyContact: request.emergencyContact,
+      healthNotes: request.healthNotes,
+      communityId: request.communityId,
+      communityName: '幸福社区',
+      status: 'NORMAL',
+      healthStatus: '未评估',
+      todayStatus: '老人档案已创建',
+      device: MockService.emptyDevice()
+    };
+    return {
+      code: 0,
+      message: 'success',
+      data: elderly,
+      ts: MOCK_TS
+    };
+  }
+
+  static mockUpdateElderly(request: ElderlyForm): Result<null> {
+    return {
+      code: request.id === undefined ? 400 : 0,
+      message: request.id === undefined ? '缺少老人 ID' : 'success',
+      data: null,
+      ts: MOCK_TS
+    };
+  }
+
+  static mockUpdateElderlyByContact(request: ElderlyForm): Result<Elderly> {
+    if (request.name.length === 0 || (request.phone ?? '').length === 0) {
+      return {
+        code: 400,
+        message: '未找到匹配的老人，请检查姓名和电话',
+        data: null,
+        ts: MOCK_TS
+      };
+    }
+    return MockService.mockRegisterElderly(request);
+  }
+
+  static mockSearchElderly(keyword: string): Result<ElderlySearchItem[]> {
+    let records: ElderlySearchItem[] = [];
+    if (keyword.length > 0) {
+      records.push({
+        id: 1,
+        name: '王大爷',
+        age: 78,
+        gender: 'MALE',
+        communityId: 1,
+        phone: '010-88886666'
+      });
+    }
+    return {
+      code: 0,
+      message: 'success',
+      data: records,
       ts: MOCK_TS
     };
   }

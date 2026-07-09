@@ -57,6 +57,10 @@ struct FamilyHome {
   @State pushTip: string = '正在监听老人端与设备端告警';
 
   aboutToAppear(): void {
+    if (this.elderlyId <= 0) {
+      router.replaceUrl({ url: 'pages/BindElderly' });
+      return;
+    }
     this.loadHome();
     AlertPushService.startMockSosPush((alert: Alert) => {
       this.handleReceivedSosAlert(alert);
@@ -194,13 +198,13 @@ struct FamilyHome {
               Text('设备')
                 .fontSize(15)
                 .fontColor('#667085')
-              Text(`${this.device.battery ?? 0}%`)
+              Text(`${this.device?.battery ?? 0}%`)
                 .fontSize(28)
                 .fontWeight(FontWeight.Bold)
                 .fontColor('#172033')
-              Text(this.device.status === 'ONLINE' ? '在线' : '离线')
+              Text((this.device?.status ?? '') === 'ONLINE' ? '在线' : '离线')
                 .fontSize(14)
-                .fontColor(this.statusColor(this.device.status))
+                .fontColor(this.statusColor(this.device?.status ?? ''))
               Text('电量')
                 .fontSize(13)
                 .fontColor('#98A2B3')
@@ -289,7 +293,7 @@ struct FamilyHome {
               router.pushUrl({ url: 'pages/PersonalCenter' });
             })
 
-          Text(`最近心跳：${this.device.lastHeartbeat || '-'}`)
+          Text(`最近心跳：${this.device?.lastHeartbeat || '-'}`)
             .fontSize(12)
             .fontColor('#98A2B3')
             .width('100%')

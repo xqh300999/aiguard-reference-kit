@@ -33,7 +33,7 @@ struct AlertDetail {
 
   aboutToAppear(): void {
     let params = router.getParams() as AlertDetailParams;
-    this.alertId = params.alertId ?? params.id ?? 0;
+    this.alertId = params === undefined ? 0 : (params.alertId ?? params.id ?? 0);
     if (this.alertId <= 0) {
       this.errorMessage = '缺少告警 ID';
       promptAction.showToast({ message: this.errorMessage });

@@ -2,9 +2,9 @@ import { http } from '@kit.NetworkKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { Constants } from '../common/Constants';
 import { Alert, AlertPage } from '../models/Alert';
-import { Elderly } from '../models/Elderly';
+import { Elderly, ElderlyForm, ElderlySearchItem } from '../models/Elderly';
 import { Result } from '../models/Result';
-import { User } from '../models/User';
+import { BindByContactRequest, RegisterFamilyRequest, User, UserAccount } from '../models/User';
 import { FamilyHomeData, MockService, UnreadCountData } from './MockService';
 
 type RequestData = string | number | boolean | object | null;
@@ -33,6 +33,12 @@ export class ApiService {
   //    GET  /api/v1/alerts/{id}
   //    GET  /api/v1/notifications/unread-count?userId={userId}
   //    PATCH /api/v1/notifications/{id}/read
+  //    POST /api/v1/auth/register
+  //    PUT  /api/v1/users/{userId}/bind-by-contact
+  //    POST /api/v1/elderly/register
+  //    GET  /api/v1/elderly/search?keyword=王
+  //    PUT  /api/v1/elderly
+  //    PUT  /api/v1/elderly/update-by-contact
   // 4. SOS 实时接收后续替换为：WS /ws/alerts?token=<JWT_TOKEN>。
 
   static isSuccess<T>(result: Result<T>): boolean {
@@ -48,6 +54,24 @@ export class ApiService {
       password: password
     };
     return ApiService.post<User>('/api/v1/auth/login', body, false);
+  }
+
+  static registerFamily(request: RegisterFamilyRequest): Promise<Result<UserAccount>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockRegisterFamily(request));
+    }
+    return ApiService.post<UserAccount>('/api/v1/auth/register', request, false);
+  }
+
+  static bindElderlyByContact(userId: number, name: string, phone: string): Promise<Result<UserAccount>> {
+    let body: BindByContactRequest = {
+      name: name,
+      phone: phone
+    };
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockBindElderlyByContact(userId, body));
+    }
+    return ApiService.put<UserAccount>(`/api/v1/users/${userId}/bind-by-contact`, body, true);
   }
 
   static async getFamilyHome(elderlyId: number, userId: number): Promise<Result<FamilyHomeData>> {
@@ -78,7 +102,7 @@ export class ApiService {
       message: 'success',
       data: {
         elderly: elderlyResult.data,
-        device: elderlyResult.data.device,
+        device: elderlyResult.data.device ?? MockService.emptyDevice(),
         latestAlert: latestAlert,
         unreadCount: unreadCount
       },
@@ -105,6 +129,34 @@ export class ApiService {
       return Promise.resolve(MockService.mockGetElderlyStatus());
     }
     return ApiService.get<Elderly>(`/api/v1/elderly/${elderlyId}`, true);
+  }
+
+  static registerElderly(request: ElderlyForm): Promise<Result<Elderly>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockRegisterElderly(request));
+    }
+    return ApiService.post<Elderly>('/api/v1/elderly/register', request, true);
+  }
+
+  static updateElderly(request: ElderlyForm): Promise<Result<null>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockUpdateElderly(request));
+    }
+    return ApiService.put<null>('/api/v1/elderly', request, true);
+  }
+
+  static updateElderlyByContact(request: ElderlyForm): Promise<Result<Elderly>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockUpdateElderlyByContact(request));
+    }
+    return ApiService.put<Elderly>('/api/v1/elderly/update-by-contact', request, true);
+  }
+
+  static searchElderly(keyword: string): Promise<Result<ElderlySearchItem[]>> {
+    if (Constants.USE_MOCK) {
+      return Promise.resolve(MockService.mockSearchElderly(keyword));
+    }
+    return ApiService.get<ElderlySearchItem[]>(`/api/v1/elderly/search?keyword=${encodeURIComponent(keyword)}`, true);
   }
 
   static getUnreadAlertCount(userId: number): Promise<Result<UnreadCountData>> {

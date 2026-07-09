@@ -105,6 +105,15 @@ struct ElderlyProfile {
           .backgroundColor(Color.White)
           .borderRadius(8)
 
+          Button('修改老人档案')
+            .width('100%')
+            .height(48)
+            .backgroundColor('#246BFD')
+            .borderRadius(8)
+            .onClick(() => {
+              router.pushUrl({ url: 'pages/ElderlyEdit', params: { mode: 'edit' } });
+            })
+
           Column({ space: 12 }) {
             Text('基本信息')
               .fontSize(18)
@@ -156,26 +165,26 @@ struct ElderlyProfile {
                 .fontWeight(FontWeight.Bold)
                 .fontColor('#172033')
               Blank()
-              Text(this.profile.device.status === 'ONLINE' ? '在线' : '离线')
+              Text((this.profile.device?.status ?? '') === 'ONLINE' ? '在线' : '离线')
                 .fontSize(13)
-                .fontColor(this.profile.device.status === 'ONLINE' ? '#12B76A' : '#D92D20')
+                .fontColor((this.profile.device?.status ?? '') === 'ONLINE' ? '#12B76A' : '#D92D20')
                 .padding({ left: 9, right: 9, top: 4, bottom: 4 })
-                .backgroundColor(this.profile.device.status === 'ONLINE' ? '#ECFDF3' : '#FFF1F0')
+                .backgroundColor((this.profile.device?.status ?? '') === 'ONLINE' ? '#ECFDF3' : '#FFF1F0')
                 .borderRadius(8)
             }
             .width('100%')
 
-            Text(this.profile.device.name)
+            Text(this.profile.device?.name || '未绑定设备')
               .fontSize(18)
               .fontWeight(FontWeight.Medium)
               .fontColor('#172033')
-            Text(`设备类型：${this.profile.device.type}`)
+            Text(`设备类型：${this.profile.device?.type || '-'}`)
               .fontSize(15)
               .fontColor('#344054')
-            Text(`电量：${this.profile.device.battery ?? 0}%`)
+            Text(`电量：${this.profile.device?.battery ?? 0}%`)
               .fontSize(15)
               .fontColor('#344054')
-            Text(`最近心跳：${this.profile.device.lastHeartbeat || '-'}`)
+            Text(`最近心跳：${this.profile.device?.lastHeartbeat || '-'}`)
               .fontSize(14)
               .fontColor('#667085')
           }

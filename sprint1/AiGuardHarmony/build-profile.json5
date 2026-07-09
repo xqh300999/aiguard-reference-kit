@@ -1,6 +1,20 @@
 {
   "app": {
-    "signingConfigs": [],
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "C:\\Users\\zss\\.ohos\\config\\default_AiGuardHarmony_s8QUtXUog59eU-sr6K83YhxBOJcnbz5TFmDLU4hD6zg=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001B612AC6DC3AECBFE7F68727095B11F21DB5BB9DA8446F1800C8DF82DB214F73E7E4AFD42F651DEF",
+          "profile": "C:\\Users\\zss\\.ohos\\config\\default_AiGuardHarmony_s8QUtXUog59eU-sr6K83YhxBOJcnbz5TFmDLU4hD6zg=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "C:\\Users\\zss\\.ohos\\config\\default_AiGuardHarmony_s8QUtXUog59eU-sr6K83YhxBOJcnbz5TFmDLU4hD6zg=.p12",
+          "storePassword": "0000001B04DFB3525B1A4FD7CE6CD9530C78EB397AD68211F89529F18C12699AEC58D14B92A7C7E601F2DB"
+        }
+      }
+    ],
     "products": [
       {
         "name": "default",

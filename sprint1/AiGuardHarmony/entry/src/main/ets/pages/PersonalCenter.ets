@@ -100,6 +100,25 @@ struct PersonalCenter {
       .backgroundColor(Color.White)
       .borderRadius(8)
 
+      Button('绑定老人')
+        .width('100%')
+        .height(48)
+        .backgroundColor('#246BFD')
+        .borderRadius(8)
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/BindElderly' });
+        })
+
+      Button('注册老人档案')
+        .width('100%')
+        .height(48)
+        .backgroundColor('#EEF4FF')
+        .fontColor('#246BFD')
+        .borderRadius(8)
+        .onClick(() => {
+          router.pushUrl({ url: 'pages/ElderlyEdit', params: { mode: 'create' } });
+        })
+
       Blank()
 
       Button('退出登录')

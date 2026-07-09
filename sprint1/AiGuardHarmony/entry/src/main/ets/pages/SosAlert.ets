@@ -31,7 +31,7 @@ struct SosAlert {
 
   aboutToAppear(): void {
     let params = router.getParams() as SosAlertParams;
-    this.alertId = params.alertId ?? 0;
+    this.alertId = params === undefined ? 0 : (params.alertId ?? 0);
     if (this.alertId <= 0) {
       this.errorMessage = '缺少 SOS 告警 ID';
       promptAction.showToast({ message: this.errorMessage });
