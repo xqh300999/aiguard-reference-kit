@@ -67,16 +67,19 @@ const rules: FormRules = {
 }
 
 const fetchData = async () => {
+  tableData.value = []
   try {
     const data = await getCommunities()
-    tableData.value = data
-  } catch {
-    tableData.value = [
-      { id: 1, name: '幸福社区', address: '北京市朝阳区幸福路1号', area: '朝阳区', elderlyCount: 25, deviceCount: 12, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 2, name: '阳光社区', address: '北京市海淀区阳光大道2号', area: '海淀区', elderlyCount: 32, deviceCount: 18, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 3, name: '和谐社区', address: '北京市西城区和谐街3号', area: '西城区', elderlyCount: 18, deviceCount: 8, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 4, name: '平安社区', address: '北京市东城区平安巷4号', area: '东城区', elderlyCount: 45, deviceCount: 25, createdAt: '2026-07-01T08:00:00Z' }
-    ]
+    tableData.value = data.map(item => ({
+      ...item,
+      elderlyCount: item.elderlyCount ?? 0,
+      deviceCount: item.deviceCount ?? 0
+    }))
+    if (tableData.value.length === 0) {
+      ElMessage.info('暂无社区数据')
+    }
+  } catch (error: any) {
+    ElMessage.error('获取社区列表失败: ' + (error.response?.data?.message || error.message || '未知错误'))
   }
 }
 

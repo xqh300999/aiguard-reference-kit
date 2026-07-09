@@ -9,16 +9,16 @@ export const getAlertDetail = (id: number): Promise<AlertDetail> => {
   return request.get(`/alerts/${id}`)
 }
 
-export const takeAlert = (id: number): Promise<AlertDetail> => {
-  return request.post(`/alerts/${id}/take`)
+export const createDispatch = (data: CreateDispatchPayload): Promise<DispatchRecord> => {
+  return request.post('/dispatches', data)
 }
 
-export const completeAlert = (id: number, data: UpdateDispatchPayload): Promise<AlertDetail> => {
-  return request.post(`/alerts/${id}/complete`, data)
+export const getDispatchByAlert = (alertId: number): Promise<DispatchRecord> => {
+  return request.get(`/dispatches/alert/${alertId}`)
 }
 
-export const dispatchAlert = (id: number, data: CreateDispatchPayload): Promise<DispatchRecord> => {
-  return request.post(`/alerts/${id}/dispatch`, data)
+export const updateDispatch = (id: number, data: UpdateDispatchPayload): Promise<DispatchRecord> => {
+  return request.patch(`/dispatches/${id}`, data)
 }
 
 export const updateAlert = (id: number, data: Partial<Pick<AlertRecord, 'status'>>): Promise<AlertDetail> => {

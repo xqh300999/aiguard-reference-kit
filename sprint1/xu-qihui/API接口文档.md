@@ -1,8 +1,9 @@
 # AiGuard 智慧养老管理系统 — API 接口文档
 
 > **基础路径：** `http://<服务器地址>:8080`
-> **接口前缀：** 所有接口路径以 `/api/v1` 开头（如 `/api/v1/auth/login`）
-> **认证方式：** 所有接口（除登录外）请求头需携带 `Authorization: Bearer <token>`
+> **移动端接口前缀：** `/api/v1`（如 `/api/v1/auth/login`）
+> **网页端接口前缀：** `/api/web/v1`（如 `/api/web/v1/auth/register`）
+> **认证方式：** 所有接口（除登录/注册外）请求头需携带 `Authorization: Bearer <token>`
 > **统一返回格式：** `{ code: int, message: string, data: object, ts: string }`
 > **成功码：** `code: 0`（不是 200）
 > **时间戳：** ISO 8601 格式，如 `"2026-07-05T10:00:00Z"`
@@ -13,9 +14,22 @@
 ## 目录
 
 - [1. 认证相关](#1-认证相关)
+  - [1.1 用户登录](#11-用户登录)
+  - [1.2 Token 刷新](#12-token-刷新)
+  - [1.3 用户注册](#13-用户注册)
+  - [1.4 用户绑定老人](#14-用户绑定老人)
+  - [1.5 按姓名电话绑定老人](#15-按姓名电话绑定老人)
 - [2. 用户管理](#2-用户管理)
 - [3. 社区管理](#3-社区管理)
 - [4. 老人档案](#4-老人档案)
+  - [4.1 创建老人档案](#41-创建老人档案)
+  - [4.2 老人列表](#42-老人列表)
+  - [4.3 家人端注册老人](#43-家人端注册老人)
+  - [4.4 搜索老人（用于绑定）](#44-搜索老人用于绑定)
+  - [4.5 老人详情](#45-老人详情)
+  - [4.6 更新老人档案](#46-更新老人档案)
+  - [4.7 删除老人档案](#47-删除老人档案)
+  - [4.8 老人告警历史](#48-老人告警历史)
 - [5. 设备管理](#5-设备管理)
 - [6. 告警管理](#6-告警管理)
 - [7. 派单管理](#7-派单管理)
@@ -53,7 +67,8 @@ POST /api/v1/auth/login
     "token": "eyJhbGciOiJIUzI1NiJ9...",
     "userId": 1,
     "role": "ADMIN",
-    "realName": "管理员"
+    "realName": "管理员",
+    "elderlyId": null
   },
   "ts": "2026-07-05T10:00:00Z"
 }
@@ -65,6 +80,7 @@ POST /api/v1/auth/login
 | userId | Long | 用户 ID |
 | role | String | 角色：ADMIN / WORKER / FAMILY / ELDERLY |
 | realName | String | 真实姓名 |
+| elderlyId | Long | 绑定老人 ID，未绑定则为 null |
 
 **Response 401 用户名或密码错误：**
 ```json
@@ -103,6 +119,189 @@ POST /api/v1/auth/refresh
 {
   "code": 401,
   "message": "Token 已过期，请重新登录",
+  "data": null,
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+> **⚠️ 尚未实现** — Token 刷新功能待开发，当前 Token 有效期 24 小时。
+
+### 1.3 用户注册
+
+#### 移动端注册（仅限家属）
+
+```
+POST /api/v1/auth/register
+```
+
+**说明：** 移动端只允许注册 `FAMILY` 角色。
+
+**Request Body：**
+```json
+{
+  "username": "family2",
+  "password": "123456",
+  "realName": "张三",
+  "phone": "13800000005",
+  "role": "FAMILY",
+  "communityId": 1
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| username | String | 是 | 账号，唯一 |
+| password | String | 是 | 密码 |
+| realName | String | 是 | 真实姓名 |
+| phone | String | 否 | 手机号 |
+| role | String | 是 | **仅限 `FAMILY`**，传其他角色返回 400 |
+| communityId | Long | 是 | 所属社区 ID |
+
+**Response 200：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": 5,
+    "username": "family2",
+    "realName": "张三",
+    "phone": "13800000005",
+    "role": "FAMILY",
+    "communityId": 1,
+    "elderlyId": null,
+    "status": "ENABLED"
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+**Response 400：** 用户名已存在 / 角色不合法
+```json
+{
+  "code": 400,
+  "message": "用户名已存在",
+  "data": null,
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+#### 网页端注册（支持家属 + 社区工作人员）
+
+```
+POST /api/web/v1/auth/register
+```
+
+**说明：** 网页端允许注册 `FAMILY` 或 `COMMUNITY_WORKER` 角色（不可注册 ADMIN）。
+
+**Request Body：**
+```json
+{
+  "username": "worker3",
+  "password": "123456",
+  "realName": "李四",
+  "phone": "13800000006",
+  "role": "COMMUNITY_WORKER",
+  "communityId": 1
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| username | String | 是 | 账号，唯一 |
+| password | String | 是 | 密码 |
+| realName | String | 是 | 真实姓名 |
+| phone | String | 否 | 手机号 |
+| role | String | 是 | `FAMILY` 或 `COMMUNITY_WORKER`（不可注册 ADMIN） |
+| communityId | Long | 是 | 所属社区 ID |
+
+**Response 200／400：** 格式同移动端。
+
+> **接口设计说明：** 移动端和网页端使用不同的注册接口，移动端 `/api/v1/auth/register` 限制仅可注册家属，网页端 `/api/web/v1/auth/register` 允许注册家属和社区工作人员，实现接口层面的职责分离。
+
+---
+
+## 1.4 用户绑定老人（管理端）
+
+```
+PUT /api/v1/users/{userId}/bind
+```
+
+**说明：** 适用于管理后台（ADMIN 角色），已知老人 ID 时直接绑定。
+
+**请求头：** `Authorization: Bearer <token>`
+
+**Request Body：**
+```json
+{
+  "elderlyId": 1
+}
+```
+
+**Response 200：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": 4,
+    "username": "family1",
+    "role": "FAMILY",
+    "realName": "王五",
+    "elderlyId": 1,
+    "communityId": 1,
+    "status": "ENABLED"
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+## 1.5 按姓名电话绑定老人（家人端）
+
+```
+PUT /api/v1/users/{userId}/bind-by-contact
+```
+
+**说明：** 家人端专用。通过老人姓名 + 电话匹配并绑定，无需知道数据库 ID。
+适合流程：注册家属账号 → 注册老人信息 → 按姓名电话绑定。
+
+**请求头：** `Authorization: Bearer <token>`
+
+**Request Body：**
+```json
+{
+  "name": "测试老人",
+  "phone": "13800000999"
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| name | String | 是 | 老人姓名，精确匹配 |
+| phone | String | 是 | 老人电话，精确匹配 |
+
+**Response 200：** 返回用户信息（含 elderlyId）
+```json
+{
+  "code": 0,
+  "data": {
+    "id": 4,
+    "username": "family1",
+    "role": "FAMILY",
+    "realName": "王五",
+    "elderlyId": 5,
+    "communityId": 1,
+    "status": "ENABLED"
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+**Response 400：** 未找到匹配的老人
+```json
+{
+  "code": 400,
+  "message": "未找到匹配的老人，请检查姓名和电话",
   "data": null,
   "ts": "2026-07-05T10:00:00Z"
 }
@@ -380,7 +579,85 @@ GET /api/v1/elderly?page=1&size=20&communityId=1&status=ACTIVE&name=王
 | status | String | ACTIVE / INACTIVE |
 | name | String | 姓名模糊搜索 |
 
-### 4.3 老人详情
+### 4.3 家人端注册老人
+
+```
+POST /api/v1/elderly/register
+```
+
+**说明：** 家人端（FAMILY 角色）注册老人信息，创建老人档案。与 4.1 创建老人档案功能相同，但权限上 FAMILY 角色可调用。
+
+**Request Body：**
+```json
+{
+  "name": "测试老人",
+  "age": 80,
+  "gender": "MALE",
+  "address": "测试地址",
+  "phone": "13800000999",
+  "emergencyContact": "13800000100",
+  "healthNotes": "高血压，需定期服药",
+  "communityId": 1
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| name | String | 是 | 老人姓名 |
+| age | Integer | 否 | 年龄 |
+| gender | String | 是 | MALE / FEMALE |
+| address | String | 否 | 住址 |
+| phone | String | 否 | 电话号码（用于绑定） |
+| emergencyContact | String | 否 | 紧急联系人 |
+| healthNotes | String | 否 | 健康备注 |
+| communityId | Long | 是 | 所属社区 |
+
+**Response 200：**
+```json
+{
+  "code": 0,
+  "data": {
+    "id": 5,
+    "name": "测试老人",
+    "age": 80,
+    "gender": "MALE",
+    "communityId": 1,
+    "phone": "13800000999",
+    "status": "NORMAL"
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+### 4.4 搜索老人（用于绑定）
+
+```
+GET /api/v1/elderly/search?keyword=王
+```
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| keyword | String | 姓名关键词，模糊搜索 |
+
+**Response：**
+```json
+{
+  "code": 0,
+  "data": [
+    {
+      "id": 1,
+      "name": "王大爷",
+      "age": 78,
+      "gender": "MALE",
+      "communityId": 1,
+      "phone": "010-88886666"
+    }
+  ],
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+### 4.5 老人详情
 
 ```
 GET /api/v1/elderly/{id}
@@ -416,23 +693,128 @@ GET /api/v1/elderly/{id}
 }
 ```
 
-### 4.4 更新老人档案
+### 4.6 更新老人档案
+
+#### 管理端 / 网页端 — 按 ID 更新
 
 ```
-PUT /api/v1/elderly/{id}
+PUT /api/v1/elderly
 ```
 
-**Request Body：** 同 4.1，可只传需要修改的字段
+**说明：** ADMIN 和 FAMILY 可调用。通过 body 中的 `id` 字段指定要更新的老人。
 
-### 4.5 删除老人档案
+**请求头：** `Authorization: Bearer <token>`
+
+**Request Body：**
+```json
+{
+  "id": 5,
+  "address": "阳光花园小区3栋2单元501室",
+  "name": "测试老人",
+  "age": 80,
+  "gender": "MALE",
+  "phone": "13800000999",
+  "emergencyContact": "13800000100",
+  "healthNotes": "高血压，需定期服药",
+  "communityId": 1
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| id | Long | 是 | 老人 ID，指定要更新的记录 |
+| name | String | 否 | 老人姓名 |
+| age | Integer | 否 | 年龄 |
+| gender | String | 否 | MALE / FEMALE |
+| address | String | 否 | 详细住址（建议填到门牌号） |
+| phone | String | 否 | 电话号码 |
+| emergencyContact | String | 否 | 紧急联系人 |
+| healthNotes | String | 否 | 健康备注 |
+| communityId | Long | 否 | 所属社区 |
+
+**Response 200：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": null,
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+#### 家人端 — 按姓名电话更新
+
+```
+PUT /api/v1/elderly/update-by-contact
+```
+
+**说明：** ADMIN 和 FAMILY 可调用。通过老人姓名 + 电话匹配记录并更新，无需知道数据库 ID。
+`address` 字段建议填写详细地址到门牌号（如 "阳光花园小区3栋2单元501室"）。
+
+**请求头：** `Authorization: Bearer <token>`
+
+**Request Body：**
+```json
+{
+  "name": "测试老人",
+  "phone": "13800000999",
+  "address": "阳光花园小区3栋2单元501室",
+  "healthNotes": "高血压，需定期服药"
+}
+```
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| name | String | 是 | 老人姓名，用于匹配 |
+| phone | String | 是 | 老人电话，用于匹配 |
+| address | String | 否 | 详细住址（建议填到门牌号） |
+| age | Integer | 否 | 年龄 |
+| gender | String | 否 | MALE / FEMALE |
+| emergencyContact | String | 否 | 紧急联系人 |
+| healthNotes | String | 否 | 健康备注 |
+| communityId | Long | 否 | 所属社区 |
+
+**Response 200：**
+```json
+{
+  "code": 0,
+  "message": "success",
+  "data": {
+    "id": 5,
+    "name": "测试老人",
+    "age": 80,
+    "gender": "MALE",
+    "address": "阳光花园小区3栋2单元501室",
+    "phone": "13800000999",
+    "healthNotes": "高血压，需定期服药",
+    "communityId": 1,
+    "status": "NORMAL"
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+**Response 400 未找到：**
+```json
+{
+  "code": 400,
+  "message": "未找到匹配的老人，请检查姓名和电话",
+  "data": null,
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+### 4.7 删除老人档案
 
 ```
 DELETE /api/v1/elderly/{id}
 ```
 
+**说明：** 仅 ADMIN 和 FAMILY 可调用。COMMUNITY_WORKER 无删除权限。
+
 > 删除后关联设备的 `elderlyId` 自动清空，关联告警保留但标记。
 
-### 4.6 老人告警历史
+### 4.8 老人告警历史
 
 ```
 GET /api/v1/elderly/{id}/alerts?page=1&size=20&status=PENDING
@@ -872,8 +1254,12 @@ GET /api/v1/care-logs/{id}
 ### 10.1 仪表盘总览
 
 ```
-GET /api/v1/stats/overview?communityId=1
+GET /api/v1/stats/overview/{communityId}
 ```
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| communityId | Long | 是 | 社区 ID（路径参数） |
 
 **Response：**
 ```json
@@ -889,15 +1275,64 @@ GET /api/v1/stats/overview?communityId=1
 }
 ```
 
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| totalElderly | Long | 老人总数 |
+| todayAlerts | Long | 今日告警数（happened_at >= 今日 00:00） |
+| onlineDevices | Long | 在线设备数（status = 'ONLINE'） |
+| pendingAlerts | Long | 待处理告警数（status = 'PENDING'） |
+
 ### 10.2 告警统计趋势
 
 ```
 GET /api/v1/stats/alerts/{communityId}?period=weekly
 ```
 
-| 参数 | 说明 |
-|------|------|
-| period | daily(按天) / weekly(按周) / monthly(按月) |
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| communityId | Long | 是 | 社区 ID（路径参数） |
+| period | String | 否 | 统计周期：daily(按天，近7天) / weekly(按周，近4周，默认) / monthly(按月，近6个月) |
+
+**Response：**
+```json
+{
+  "code": 0,
+  "data": {
+    "period": "weekly",
+    "records": [
+      {
+        "label": "2026-W28",
+        "total": 2,
+        "details": [
+          { "type": "SOS", "count": 1 },
+          { "type": "INACTIVITY", "count": 1 }
+        ]
+      },
+      {
+        "label": "2026-W27",
+        "total": 4,
+        "details": [
+          { "type": "FALL", "count": 1 },
+          { "type": "LOW_BATTERY", "count": 1 },
+          { "type": "ABNORMAL", "count": 1 },
+          { "type": "SOS", "count": 1 }
+        ]
+      }
+    ]
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| period | String | 统计周期 |
+| records | Array | 趋势记录列表，按时间正序 |
+| records[].label | String | 时间标签（daily: `2026-07-05` / weekly: `2026-W28` / monthly: `2026-07`） |
+| records[].total | Long | 该时间段告警总数 |
+| records[].details | Array | 按告警类型分类的明细 |
+| records[].details[].type | String | 告警类型：SOS / FALL / INACTIVITY / LOW_BATTERY / DEVICE_OFFLINE / ABNORMAL |
+| records[].details[].count | Long | 该类型告警数量 |
 
 ### 10.3 关怀统计
 
@@ -905,13 +1340,69 @@ GET /api/v1/stats/alerts/{communityId}?period=weekly
 GET /api/v1/stats/care/{communityId}?period=weekly
 ```
 
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| communityId | Long | 是 | 社区 ID（路径参数） |
+| period | String | 否 | 统计周期：daily(按天，近7天) / weekly(按周，近4周，默认) / monthly(按月，近6个月) |
+
+**Response：**
+```json
+{
+  "code": 0,
+  "data": {
+    "period": "weekly",
+    "records": [
+      {
+        "label": "2026-W28",
+        "total": 3,
+        "details": [
+          { "type": "PHONE", "count": 1 },
+          { "type": "VISIT", "count": 1 },
+          { "type": "MEDICINE", "count": 1 }
+        ]
+      },
+      {
+        "label": "2026-W27",
+        "total": 2,
+        "details": [
+          { "type": "PHONE", "count": 2 }
+        ]
+      }
+    ]
+  },
+  "ts": "2026-07-05T10:00:00Z"
+}
+```
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| period | String | 统计周期 |
+| records | Array | 趋势记录列表，按时间正序 |
+| records[].label | String | 时间标签（daily: `2026-07-05` / weekly: `2026-W28` / monthly: `2026-07`） |
+| records[].total | Long | 该时间段关怀记录总数 |
+| records[].details | Array | 按关怀类型分类的明细 |
+| records[].details[].type | String | 关怀类型：PHONE(电话) / VISIT(走访) / MEDICINE(用药提醒) / OTHER(其他) |
+| records[].details[].count | Long | 该类型关怀数量 |
+
 ### 10.4 导出 Excel
 
 ```
 GET /api/v1/stats/export?communityId=1
 ```
 
-> 下载一个包含 3 个 Sheet 的 Excel：老人列表、告警统计、关怀统计。
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| communityId | Long | 否 | 社区 ID，不传则导出全部社区 |
+
+**Response：** 直接返回 Excel 文件流（`Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`），浏览器自动下载 `统计报表.xlsx`。
+
+Excel 包含 3 个 Sheet：
+
+| Sheet | 名称 | 列 |
+|-------|------|-----|
+| 1 | 老人列表 | ID / 姓名 / 年龄 / 性别 / 社区 / 电话 / 紧急联系人 / 健康备注 / 状态 |
+| 2 | 告警统计 | ID / 类型 / 老人姓名 / 社区 / 状态 / 优先级 / 发生时间 |
+| 3 | 关怀统计 | ID / 类型 / 老人姓名 / 护工 / 老人状态 / 备注 / 记录时间 |
 
 ---
 
@@ -1056,4 +1547,13 @@ WS /ws/alerts?token=<JWT_TOKEN>
 
 ---
 
-*文档版本：v2.0 | 最后更新：2026-07-05*
+*文档版本：v2.4 | 最后更新：2026-07-09*
+
+### 接口分离说明
+
+| 端 | 接口前缀 | 注册限制 |
+|----|---------|---------|
+| **移动端 (HarmonyOS)** | `/api/v1/...` | 仅 `FAMILY` |
+| **网页端 (Vue Admin)** | `/api/web/v1/...` | `FAMILY` + `COMMUNITY_WORKER` |
+
+> 网页端通过 Vite 代理将 `/api` 路径自动映射到 `/api/v1`（共享接口）或 `/api/web`（网页专用接口）。移动端直接请求完整路径。

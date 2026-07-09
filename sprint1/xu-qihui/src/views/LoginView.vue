@@ -20,6 +20,9 @@
             </el-button>
           </el-form-item>
           <p style="margin: 12px 0 0; color: #768198; font-size: 13px;">测试账号：admin/admin123 或 worker/worker123</p>
+          <p style="margin: 8px 0 0; color: #768198; font-size: 13px;">
+            没有账号？<router-link to="/register" style="color: #409eff;">立即注册</router-link>
+          </p>
         </el-form>
       </section>
     </div>
@@ -47,7 +50,16 @@ const form = reactive({
 
 const rules: FormRules = {
   username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, message: '密码至少 6 位', trigger: 'blur' }
+  ]
+}
+
+const getHomePath = () => {
+  if (authStore.user?.role === 'ADMIN' || authStore.user?.role === 'SUPER_ADMIN') return '/admin/dashboard'
+  if (authStore.user?.role === 'WORKER') return '/worker/workbench'
+  return ''
 }
 
 const handleLogin = async () => {
@@ -58,10 +70,20 @@ const handleLogin = async () => {
     try {
       const data = await login(form)
       authStore.login(data)
-      router.push('/worker/workbench')
+      const homePath = getHomePath()
+      if (!homePath) {
+        authStore.logout()
+        ElMessage.error('当前角色不能进入管理端')
+        return
+      }
+      router.push(homePath)
       ElMessage.success('登录成功')
-    } catch {
-      ElMessage.error('用户名或密码错误')
+    } catch (error: any) {
+      if (error.message?.includes('Network Error') || error.message?.includes('ETIMEDOUT') || error.message?.includes('ERR_CONNECTION')) {
+        ElMessage.error('网络连接失败，请检查后端服务')
+      } else {
+        ElMessage.error(error.response?.data?.message || '用户名或密码错误')
+      }
     } finally {
       loading.value = false
     }
@@ -71,7 +93,7 @@ const handleLogin = async () => {
 onMounted(() => {
   authStore.init()
   if (authStore.token) {
-    router.push('/worker/workbench')
+    router.push(getHomePath() || '/worker/workbench')
   }
 })
 </script>

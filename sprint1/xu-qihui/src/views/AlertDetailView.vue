@@ -154,7 +154,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import { completeAlert, getAlertDetail, takeAlert } from '@/api/alerts'
+import { createDispatch, getAlertDetail, getDispatchByAlert, updateAlert, updateDispatch } from '@/api/alerts'
+import { useAuthStore } from '@/stores/auth'
 import type { AlertDetail as AlertDetailType, DispatchResult, ElderlySummary } from '@/types/api'
 import {
   alertStatusTag,
@@ -166,6 +167,7 @@ import {
 
 const route = useRoute()
 const router = useRouter()
+const authStore = useAuthStore()
 const loading = ref(false)
 const actionLoading = ref(false)
 const processVisible = ref(false)
@@ -214,7 +216,11 @@ async function acceptAlert() {
 
   actionLoading.value = true
   try {
-    await takeAlert(alert.value.id)
+    await createDispatch({
+      alertId: alert.value.id,
+      handlerId: authStore.user?.userId || 2,
+    })
+    await updateAlert(alert.value.id, { status: 'PROCESSING' })
     ElMessage.success('接单成功')
     await loadDetail()
   } finally {
@@ -235,7 +241,8 @@ async function submitProcess() {
 
   actionLoading.value = true
   try {
-    await completeAlert(alert.value.id, {
+    const dispatch = alert.value.dispatch ?? (await getDispatchByAlert(alert.value.id))
+    await updateDispatch(dispatch.id, {
       result: processForm.result,
       description: processForm.description,
     })

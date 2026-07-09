@@ -24,7 +24,10 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { getStatsOverview } from '@/api'
+import { useAuthStore } from '@/stores/auth'
 import type { StatsOverview } from '@/types/api'
+
+const authStore = useAuthStore()
 
 const stats = ref<StatsOverview>({
   totalElderly: 0,
@@ -35,14 +38,15 @@ const stats = ref<StatsOverview>({
 
 const fetchStats = async () => {
   try {
-    const data = await getStatsOverview()
+    const communityId = authStore.user?.communityId || 1
+    const data = await getStatsOverview(communityId)
     stats.value = data
   } catch {
     stats.value = {
-      totalElderly: 128,
-      todayAlerts: 5,
-      onlineDevices: 96,
-      pendingAlerts: 3
+      totalElderly: 0,
+      todayAlerts: 0,
+      onlineDevices: 0,
+      pendingAlerts: 0
     }
   }
 }

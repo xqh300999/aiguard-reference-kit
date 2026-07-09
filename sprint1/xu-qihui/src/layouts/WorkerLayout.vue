@@ -73,8 +73,8 @@ const route = useRoute()
 const router = useRouter()
 
 const pageTitle = computed(() => {
-  if (route.name === 'WorkerAlerts') return '告警列表'
-  if (route.name === 'WorkerAlertDetail') return '告警详情'
+  if (route.name === 'WorkerAlerts' || route.name === 'AcceptanceAlerts') return '告警列表'
+  if (route.name === 'WorkerAlertDetail' || route.name === 'AcceptanceAlertDetail') return '告警详情'
   return '工作台'
 })
 

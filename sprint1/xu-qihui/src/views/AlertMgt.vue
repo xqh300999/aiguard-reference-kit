@@ -164,13 +164,8 @@ const fetchData = async () => {
     tableData.value = data.records
     total.value = data.total
   } catch {
-    tableData.value = [
-      { id: 1, type: 'SOS', typeName: '紧急求助', elderlyId: 1, elderlyName: '张三', communityId: 1, communityName: '幸福社区', status: 'PENDING', statusName: '待处理', priority: 'HIGH', handlerId: null, handlerName: null, happenedAt: '2026-07-05T10:30:00Z', resolvedAt: null },
-      { id: 2, type: 'SOS', typeName: '紧急求助', elderlyId: 2, elderlyName: '李四', communityId: 1, communityName: '幸福社区', status: 'PROCESSING', statusName: '处理中', priority: 'HIGH', handlerId: 2, handlerName: '社区工作人员', happenedAt: '2026-07-05T10:25:00Z', resolvedAt: null },
-      { id: 3, type: 'FALL', typeName: '跌倒检测', elderlyId: 3, elderlyName: '王五', communityId: 2, communityName: '阳光社区', status: 'RESOLVED', statusName: '已解决', priority: 'HIGH', handlerId: 3, handlerName: '社区工作人员', happenedAt: '2026-07-05T10:20:00Z', resolvedAt: '2026-07-05T10:35:00Z' },
-      { id: 4, type: 'DEVICE_OFFLINE', typeName: '设备离线', elderlyId: 4, elderlyName: '赵六', communityId: 3, communityName: '和谐社区', status: 'PENDING', statusName: '待处理', priority: 'MEDIUM', handlerId: null, handlerName: null, happenedAt: '2026-07-05T10:15:00Z', resolvedAt: null }
-    ]
-    total.value = 4
+    tableData.value = []
+    total.value = 0
   }
 }
 
@@ -179,12 +174,7 @@ const fetchCommunities = async () => {
     const data = await getCommunities()
     communities.value = data
   } catch {
-    communities.value = [
-      { id: 1, name: '幸福社区', address: '北京市朝阳区幸福路1号', area: '朝阳区', elderlyCount: 25, deviceCount: 12, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 2, name: '阳光社区', address: '北京市海淀区阳光大道2号', area: '海淀区', elderlyCount: 32, deviceCount: 18, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 3, name: '和谐社区', address: '北京市西城区和谐街3号', area: '西城区', elderlyCount: 18, deviceCount: 8, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 4, name: '平安社区', address: '北京市东城区平安巷4号', area: '东城区', elderlyCount: 45, deviceCount: 25, createdAt: '2026-07-01T08:00:00Z' }
-    ]
+    communities.value = []
   }
 }
 

@@ -1,13 +1,18 @@
 <template>
-  <div class="app-shell">
+  <div :class="['app-shell', { 'nav-collapsed': collapsed }]">
     <aside class="side-nav">
-      <RouterLink class="brand" to="/admin/dashboard">
-        <span class="brand-mark">A</span>
-        <span>
-          <strong>AiGuard</strong>
-          <small>管理后台</small>
-        </span>
-      </RouterLink>
+      <div class="brand-row">
+        <RouterLink class="brand" to="/admin/dashboard">
+          <span class="brand-mark">A</span>
+          <span>
+            <strong>AiGuard</strong>
+            <small>管理后台</small>
+          </span>
+        </RouterLink>
+        <button class="collapse-button" type="button" title="折叠菜单" @click="collapsed = !collapsed">
+          <Menu :size="18" />
+        </button>
+      </div>
 
       <nav class="nav-list">
         <RouterLink class="nav-item" to="/worker/workbench">
@@ -78,8 +83,8 @@
 </template>
 
 <script setup lang="ts">
-import { LayoutDashboard, Building2, Users, UserCircle, MonitorSmartphone, AlertTriangle, ShieldCheck, LogOut, Home } from 'lucide-vue-next'
-import { computed } from 'vue'
+import { LayoutDashboard, Building2, Users, UserCircle, MonitorSmartphone, AlertTriangle, ShieldCheck, LogOut, Home, Menu } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
@@ -87,6 +92,7 @@ import { useAuthStore } from '@/stores/auth'
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
+const collapsed = ref(false)
 
 const pageTitle = computed(() => {
   const titles: Record<string, string> = {
