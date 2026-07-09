@@ -1,7 +1,12 @@
 import { promptAction, router } from '@kit.ArkUI';
+import { Constants } from '../common/Constants';
 import { StorageKeys } from '../common/StorageKeys';
 import { User } from '../models/User';
 import { ApiService } from '../services/ApiService';
+
+interface LoginParams {
+  username?: string;
+}
 
 @Entry
 @Component
@@ -10,6 +15,14 @@ struct Login {
   @State password: string = '123456';
   @State loading: boolean = false;
   @State errorMessage: string = '';
+
+  aboutToAppear(): void {
+    let params = router.getParams() as LoginParams;
+    if (params !== undefined && params.username !== undefined && params.username.length > 0) {
+      this.username = params.username;
+      this.password = '';
+    }
+  }
 
   private saveLoginState(user: User): void {
     AppStorage.setOrCreate<string>(StorageKeys.TOKEN, user.token);
@@ -50,14 +63,12 @@ struct Login {
       return;
     }
 
-    if ((result.data.elderlyId ?? 0) <= 0) {
-      this.errorMessage = '登录成功，但缺少绑定老人信息，请后端返回 elderlyId';
-      promptAction.showToast({ message: this.errorMessage });
-      return;
-    }
-
     this.saveLoginState(result.data);
     promptAction.showToast({ message: '登录成功' });
+    if ((result.data.elderlyId ?? 0) <= 0) {
+      router.replaceUrl({ url: 'pages/BindElderly' });
+      return;
+    }
     router.replaceUrl({ url: 'pages/FamilyHome' });
   }
 
@@ -158,7 +169,18 @@ struct Login {
             this.handleLogin();
           })
 
-        Text('当前为 Mock 演示模式，不连接数据库。后端完成后在 Constants 中切换真实地址。')
+        Button('注册家属账号')
+          .width('100%')
+          .height(48)
+          .fontSize(16)
+          .backgroundColor('#EEF4FF')
+          .fontColor('#246BFD')
+          .borderRadius(8)
+          .onClick(() => {
+            router.pushUrl({ url: 'pages/Register' });
+          })
+
+        Text(Constants.USE_MOCK ? '当前为 Mock 演示模式，不连接数据库。' : `当前连接后端：${Constants.API_BASE_URL}`)
           .fontSize(12)
           .fontColor('#98A2B3')
           .lineHeight(18)
