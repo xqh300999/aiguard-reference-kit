@@ -25,10 +25,16 @@
           <p class="top-eyebrow">PENDING</p>
           <h2>最新待处理告警</h2>
         </div>
-        <el-button type="primary" plain @click="router.push('/worker/alerts')">
-          <ListChecks :size="16" />
-          全部告警
-        </el-button>
+        <div class="header-actions">
+          <el-button type="primary" plain @click="loadDashboard">
+            <RefreshCw :size="16" />
+            刷新
+          </el-button>
+          <el-button type="primary" plain @click="router.push('/worker/alerts')">
+            <ListChecks :size="16" />
+            全部告警
+          </el-button>
+        </div>
       </div>
 
       <el-skeleton v-if="loading" :rows="5" animated />
@@ -59,8 +65,8 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowRight, ListChecks } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { ArrowRight, ListChecks, RefreshCw } from 'lucide-vue-next'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getAlerts } from '@/api/alerts'
@@ -94,5 +100,15 @@ async function loadDashboard() {
   }
 }
 
-onMounted(loadDashboard)
+onMounted(() => {
+  loadDashboard()
+  router.afterEach((to) => {
+    if (to.path === '/worker/workbench') {
+      loadDashboard()
+    }
+  })
+})
+
+onUnmounted(() => {
+})
 </script>

@@ -10,21 +10,22 @@ import type {
   User,
   UserSession,
 } from '@/types/api'
+import { loadPersistedData, savePersistedData } from './persistence'
 
 interface MockUser extends UserSession {
   username: string
   password: string
 }
 
-export const mockUsers: MockUser[] = [
+const defaultMockUsers: MockUser[] = [
   {
-    username: 'worker',
-    password: 'worker123',
-    token: 'mock-worker-token',
-    userId: 2,
-    role: 'WORKER',
-    realName: '李凯辉',
-    communityId: 1,
+    username: 'superadmin',
+    password: 'super123',
+    token: 'mock-super-token',
+    userId: 0,
+    role: 'SUPER_ADMIN',
+    realName: '超级管理员',
+    communityId: undefined,
   },
   {
     username: 'admin',
@@ -33,6 +34,15 @@ export const mockUsers: MockUser[] = [
     userId: 1,
     role: 'ADMIN',
     realName: '管理员',
+    communityId: 1,
+  },
+  {
+    username: 'worker',
+    password: 'worker123',
+    token: 'mock-worker-token',
+    userId: 2,
+    role: 'WORKER',
+    realName: '李凯辉',
     communityId: 1,
   },
 ]
@@ -79,26 +89,27 @@ export const mockElderlyMap: Record<number, ElderlySummary> = {
   },
 }
 
-export const mockCommunities: Community[] = [
+const defaultMockCommunities: Community[] = [
   { id: 1, name: '幸福社区', address: '北京市朝阳区幸福路1号', area: '朝阳区', elderlyCount: 3, deviceCount: 3, createdAt: '2026-07-01T08:00:00Z' },
   { id: 2, name: '阳光社区', address: '北京市海淀区阳光大道2号', area: '海淀区', elderlyCount: 0, deviceCount: 0, createdAt: '2026-07-01T08:00:00Z' },
   { id: 3, name: '和谐社区', address: '北京市西城区和谐街3号', area: '西城区', elderlyCount: 0, deviceCount: 0, createdAt: '2026-07-01T08:00:00Z' },
   { id: 4, name: '平安社区', address: '北京市东城区平安巷4号', area: '东城区', elderlyCount: 0, deviceCount: 0, createdAt: '2026-07-01T08:00:00Z' },
 ]
 
-export const mockElderlies: Elderly[] = [
+const defaultMockElderlies: Elderly[] = [
   { id: 1, name: '王大爷', age: 78, gender: 'MALE', phone: '010-88886666', communityId: 1, communityName: '幸福社区', emergencyContact: '王女士 13800138001', healthNotes: '高血压，每天服药', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', deviceId: 1 },
   { id: 2, name: '刘奶奶', age: 82, gender: 'FEMALE', phone: '010-66668888', communityId: 1, communityName: '幸福社区', emergencyContact: '刘先生 13900139002', healthNotes: '近期膝关节不适', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', deviceId: 2 },
   { id: 3, name: '赵爷爷', age: 75, gender: 'MALE', phone: '010-55557777', communityId: 1, communityName: '幸福社区', emergencyContact: '赵女士 13700137003', healthNotes: '糖尿病，需规律测血糖', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z', deviceId: 3 },
 ]
 
-export const mockDevices: Device[] = [
+const defaultMockDevices: Device[] = [
   { id: 1, name: '手表001', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F6', communityId: 1, communityName: '幸福社区', elderlyId: 1, elderlyName: '王大爷', status: 'ONLINE', battery: 85, lastHeartbeat: '2026-07-07T09:59:00Z', createdAt: '2026-07-01T08:00:00Z' },
   { id: 2, name: '手表002', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F7', communityId: 1, communityName: '幸福社区', elderlyId: 2, elderlyName: '刘奶奶', status: 'ONLINE', battery: 72, lastHeartbeat: '2026-07-07T09:58:00Z', createdAt: '2026-07-01T08:00:00Z' },
   { id: 3, name: '手表003', type: 'WATCH', mac: 'A1:B2:C3:D4:E5:F8', communityId: 1, communityName: '幸福社区', elderlyId: 3, elderlyName: '赵爷爷', status: 'OFFLINE', battery: 16, lastHeartbeat: '2026-07-07T08:00:00Z', createdAt: '2026-07-01T08:00:00Z' },
 ]
 
-export const mockSystemUsers: User[] = [
+const defaultMockSystemUsers: User[] = [
+  { id: 0, username: 'superadmin', realName: '超级管理员', phone: '', role: 'SUPER_ADMIN', communityId: undefined, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
   { id: 1, username: 'admin', realName: '管理员', phone: '', role: 'ADMIN', communityId: undefined, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
   { id: 2, username: 'worker1', realName: '李凯辉', phone: '13800138000', role: 'WORKER', communityId: 1, communityName: '幸福社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
 ]
@@ -110,7 +121,7 @@ export const mockStatsOverview: StatsOverview = {
   pendingAlerts: 3,
 }
 
-export const mockAlerts: AlertDetail[] = [
+const defaultMockAlerts: AlertDetail[] = [
   {
     id: 1001,
     type: 'SOS',
@@ -251,7 +262,7 @@ export const mockAlerts: AlertDetail[] = [
   },
 ]
 
-export const mockDispatches: DispatchRecord[] = [
+const defaultMockDispatches: DispatchRecord[] = [
   {
     id: 5001,
     alertId: 1003,
@@ -287,9 +298,31 @@ export const mockDispatches: DispatchRecord[] = [
   },
 ]
 
+const persistedData = loadPersistedData()
+
+export const mockUsers: MockUser[] = persistedData.users.length > 0 ? persistedData.users : defaultMockUsers
+export const mockSystemUsers: User[] = persistedData.systemUsers.length > 0 ? persistedData.systemUsers : defaultMockSystemUsers
+export const mockCommunities: Community[] = persistedData.communities.length > 0 ? persistedData.communities : defaultMockCommunities
+export const mockElderlies: Elderly[] = persistedData.elderlies.length > 0 ? persistedData.elderlies : defaultMockElderlies
+export const mockDevices: Device[] = persistedData.devices.length > 0 ? persistedData.devices : defaultMockDevices
+export const mockAlerts: AlertDetail[] = persistedData.alerts.length > 0 ? persistedData.alerts : defaultMockAlerts
+export const mockDispatches: DispatchRecord[] = persistedData.dispatches.length > 0 ? persistedData.dispatches : defaultMockDispatches
+
 mockAlerts.forEach((alert) => {
   alert.dispatch = mockDispatches.find((dispatch) => dispatch.alertId === alert.id) ?? null
 })
+
+export function persistData(): void {
+  savePersistedData({
+    users: mockUsers,
+    systemUsers: mockSystemUsers,
+    communities: mockCommunities,
+    elderlies: mockElderlies,
+    devices: mockDevices,
+    alerts: mockAlerts,
+    dispatches: mockDispatches,
+  })
+}
 
 export function toAlertRecord(alert: AlertDetail): AlertRecord {
   const {

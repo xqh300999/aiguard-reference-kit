@@ -1,4 +1,4 @@
-export type Role = 'ADMIN' | 'WORKER' | 'FAMILY' | 'ELDERLY'
+export type Role = 'SUPER_ADMIN' | 'ADMIN' | 'WORKER' | 'FAMILY' | 'ELDERLY'
 
 export type AlertStatus = 'PENDING' | 'PROCESSING' | 'RESOLVED' | 'NEED_HOSPITAL'
 
@@ -170,4 +170,36 @@ export interface StatsOverview {
   todayAlerts: number
   onlineDevices: number
   pendingAlerts: number
+}
+
+export interface AlertTrendDetail {
+  type: AlertType
+  count: number
+}
+
+export interface AlertTrendItem {
+  label: string
+  total: number
+  details: AlertTrendDetail[]
+}
+
+export interface AlertTrendStats {
+  period: 'daily' | 'weekly' | 'monthly'
+  records: AlertTrendItem[]
+}
+
+export interface CareStatsDetail {
+  type: string
+  count: number
+}
+
+export interface CareStatsItem {
+  label: string
+  total: number
+  details: CareStatsDetail[]
+}
+
+export interface CareStats {
+  period: 'daily' | 'weekly' | 'monthly'
+  records: CareStatsItem[]
 }

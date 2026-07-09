@@ -3,14 +3,14 @@
     <section class="section-block">
       <header class="section-heading">
         <h2>用户管理</h2>
-        <el-button type="primary" @click="openModal()">新增用户</el-button>
+        <el-button v-if="authStore.user?.role === 'SUPER_ADMIN' || authStore.user?.role === 'ADMIN'" type="primary" @click="openModal()">新增用户</el-button>
       </header>
       <el-table :data="tableData" class="work-table" border>
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="username" label="用户名" />
         <el-table-column prop="realName" label="姓名" />
         <el-table-column prop="phone" label="电话" />
-        <el-table-column prop="role" label="角色" width="100">
+        <el-table-column prop="role" label="角色" width="120">
           <template #default="scope">
             <el-tag :type="getRoleType(scope.row.role)">{{ getRoleText(scope.row.role) }}</el-tag>
           </template>
@@ -23,8 +23,8 @@
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template #default="scope">
-            <el-button size="small" @click="openModal(scope.row)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+            <el-button size="small" @click="openModal(scope.row)" :disabled="!canEdit(scope.row)">编辑</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(scope.row)" :disabled="!canDelete(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -56,6 +56,7 @@
         </el-form-item>
         <el-form-item label="角色" prop="role">
           <el-select v-model="form.role" placeholder="请选择角色">
+            <el-option v-if="isSuperAdmin" label="超级管理员" value="SUPER_ADMIN" />
             <el-option label="管理员" value="ADMIN" />
             <el-option label="工作人员" value="WORKER" />
             <el-option label="家人" value="FAMILY" />
@@ -77,12 +78,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getUsers, createUser, updateUser, deleteUser, getCommunities } from '@/api'
-import type { User, Community } from '@/types/api'
+import { useAuthStore } from '@/stores/auth'
+import type { User, Community, Role } from '@/types/api'
 
+const authStore = useAuthStore()
 const tableData = ref<User[]>([])
 const communities = ref<Community[]>([])
 const total = ref(0)
@@ -93,13 +96,15 @@ const isEdit = ref(false)
 const loading = ref(false)
 const formRef = ref<FormInstance>()
 
+const isSuperAdmin = computed(() => authStore.user?.role === 'SUPER_ADMIN')
+
 const form = reactive({
   id: 0,
   username: '',
   realName: '',
   password: '',
   phone: '',
-  role: 'WORKER' as 'ADMIN' | 'WORKER' | 'FAMILY' | 'ELDERLY',
+  role: 'WORKER' as Role,
   communityId: 0
 })
 
@@ -112,9 +117,10 @@ const rules: FormRules = {
 
 const getRoleType = (role: User['role']) => {
   const types: Record<User['role'], string> = {
-    ADMIN: 'danger',
+    SUPER_ADMIN: 'danger',
+    ADMIN: 'warning',
     WORKER: 'primary',
-    FAMILY: 'warning',
+    FAMILY: 'info',
     ELDERLY: 'success'
   }
   return types[role]
@@ -122,6 +128,7 @@ const getRoleType = (role: User['role']) => {
 
 const getRoleText = (role: User['role']) => {
   const texts: Record<User['role'], string> = {
+    SUPER_ADMIN: '超级管理员',
     ADMIN: '管理员',
     WORKER: '工作人员',
     FAMILY: '家人',
@@ -130,19 +137,36 @@ const getRoleText = (role: User['role']) => {
   return texts[role]
 }
 
+const canEdit = (row: User) => {
+  const userRole = authStore.user?.role
+  if (userRole === 'SUPER_ADMIN') {
+    return row.role !== 'SUPER_ADMIN'
+  }
+  if (userRole === 'ADMIN') {
+    return row.role === 'WORKER' || row.role === 'FAMILY' || row.role === 'ELDERLY'
+  }
+  return false
+}
+
+const canDelete = (row: User) => {
+  const userRole = authStore.user?.role
+  if (userRole === 'SUPER_ADMIN') {
+    return row.role !== 'SUPER_ADMIN'
+  }
+  if (userRole === 'ADMIN') {
+    return row.role === 'WORKER' || row.role === 'FAMILY' || row.role === 'ELDERLY'
+  }
+  return false
+}
+
 const fetchData = async () => {
   try {
     const data = await getUsers({ page: page.value, size: size.value })
     tableData.value = data.records
     total.value = data.total
   } catch {
-    tableData.value = [
-      { id: 1, username: 'admin', realName: '管理员', phone: '', role: 'ADMIN', communityId: undefined, status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
-      { id: 2, username: 'worker1', realName: '张三', phone: '13800138000', role: 'WORKER', communityId: 1, communityName: '幸福社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
-      { id: 3, username: 'worker2', realName: '李四', phone: '13800138001', role: 'WORKER', communityId: 2, communityName: '阳光社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' },
-      { id: 4, username: 'family1', realName: '王五', phone: '13800138002', role: 'FAMILY', communityId: 1, communityName: '幸福社区', status: 'ACTIVE', createdAt: '2026-07-01T08:00:00Z' }
-    ]
-    total.value = 4
+    tableData.value = []
+    total.value = 0
   }
 }
 
@@ -151,12 +175,7 @@ const fetchCommunities = async () => {
     const data = await getCommunities()
     communities.value = data
   } catch {
-    communities.value = [
-      { id: 1, name: '幸福社区', address: '北京市朝阳区幸福路1号', area: '朝阳区', elderlyCount: 25, deviceCount: 12, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 2, name: '阳光社区', address: '北京市海淀区阳光大道2号', area: '海淀区', elderlyCount: 32, deviceCount: 18, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 3, name: '和谐社区', address: '北京市西城区和谐街3号', area: '西城区', elderlyCount: 18, deviceCount: 8, createdAt: '2026-07-01T08:00:00Z' },
-      { id: 4, name: '平安社区', address: '北京市东城区平安巷4号', area: '东城区', elderlyCount: 45, deviceCount: 25, createdAt: '2026-07-01T08:00:00Z' }
-    ]
+    communities.value = []
   }
 }
 
@@ -197,7 +216,7 @@ const handleSubmit = async () => {
         await updateUser(form.id, data)
         ElMessage.success('更新成功')
       } else {
-        await createUser({ ...data, username: form.username, password: form.password! } as User)
+        await createUser({ username: form.username, password: form.password!, realName: form.realName, phone: form.phone, role: form.role, communityId: form.role === 'ADMIN' ? undefined : form.communityId })
         ElMessage.success('创建成功')
       }
       dialogVisible.value = false

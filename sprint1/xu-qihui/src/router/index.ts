@@ -11,7 +11,14 @@ const router = createRouter({
     {
       path: '/login',
       name: 'Login',
-      component: () => import('@/views/LoginView.vue')
+      component: () => import('@/views/LoginView.vue'),
+      meta: { public: true }
+    },
+    {
+      path: '/register',
+      name: 'Register',
+      component: () => import('@/views/RegisterView.vue'),
+      meta: { public: true }
     },
     {
       path: '/admin',
@@ -53,6 +60,11 @@ const router = createRouter({
           path: 'alerts/:id',
           name: 'AlertDetail',
           component: () => import('@/views/AlertDetailView.vue')
+        },
+        {
+          path: 'test',
+          name: 'Test',
+          component: () => import('@/views/TestView.vue')
         }
       ]
     },
@@ -75,9 +87,36 @@ const router = createRouter({
         {
           path: 'alerts',
           name: 'WorkerAlerts',
-          component: () => import('@/views/AlertMgt.vue')
+          component: () => import('@/views/WorkerAlertListView.vue')
         }
       ]
+    },
+    {
+      path: '/alerts',
+      component: () => import('@/layouts/WorkerLayout.vue'),
+      meta: { role: 'WORKER' },
+      children: [
+        {
+          path: '',
+          name: 'AcceptanceAlerts',
+          component: () => import('@/views/WorkerAlertListView.vue')
+        },
+        {
+          path: ':id',
+          name: 'AcceptanceAlertDetail',
+          component: () => import('@/views/AlertDetailView.vue')
+        }
+      ]
+    },
+    {
+      path: '/404',
+      name: 'NotFound',
+      component: () => import('@/views/NotFoundView.vue'),
+      meta: { public: true }
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/404'
     }
   ]
 })
@@ -86,24 +125,37 @@ router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore()
   authStore.init()
 
-  if (!authStore.token) {
-    if (to.path === '/login') {
-      next()
-    } else {
-      next('/login')
+  const isAdmin = authStore.user?.role === 'ADMIN' || authStore.user?.role === 'SUPER_ADMIN'
+  const homePath = isAdmin ? '/admin/dashboard' : '/worker/workbench'
+
+  if (to.meta.public) {
+    if (to.path === '/login' && authStore.token) {
+      next(homePath)
+      return
     }
+    next()
     return
   }
 
-  if (to.path === '/login') {
-    next('/worker/workbench')
+  if (!authStore.token) {
+    next('/login')
     return
   }
 
   const requiredRole = to.meta.role as string | undefined
-  if (requiredRole && authStore.user?.role !== requiredRole && authStore.user?.role !== 'ADMIN') {
-    next('/worker/workbench')
-    return
+  if (requiredRole) {
+    const userRole = authStore.user?.role
+    if (userRole === 'SUPER_ADMIN') {
+    } else if (userRole === 'ADMIN') {
+      if (requiredRole === 'WORKER') {
+      } else if (userRole !== requiredRole) {
+        next(homePath)
+        return
+      }
+    } else if (userRole !== requiredRole) {
+      next(homePath)
+      return
+    }
   }
 
   next()

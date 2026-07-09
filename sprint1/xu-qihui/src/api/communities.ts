@@ -2,7 +2,10 @@ import request from '@/utils/request'
 import type { Community } from '@/types/api'
 
 export const getCommunities = (): Promise<Community[]> => {
-  return request.get('/communities')
+  return request.get<Community[] | { records: Community[] }>('/communities').then((res) => {
+    if (Array.isArray(res)) return res
+    return res?.records || []
+  })
 }
 
 export const createCommunity = (data: Omit<Community, 'id' | 'elderlyCount' | 'deviceCount' | 'createdAt'>) => {

@@ -5,7 +5,7 @@ export const getUsers = (params?: { page?: number; size?: number; communityId?: 
   return request.get('/users', { params })
 }
 
-export const createUser = (data: Omit<User, 'id' | 'status' | 'createdAt'>) => {
+export const createUser = (data: Omit<User, 'id' | 'status' | 'createdAt'> & { password: string }) => {
   return request.post('/users', data)
 }
 
