@@ -15,32 +15,23 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("user")
-public class User {
+@TableName("community")
+public class Community {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @TableField("username")
-    private String username;
+    @TableField("name")
+    private String name;
 
-    @TableField("password")
-    private String password;
-
-    @TableField("real_name")
-    private String realName;
+    @TableField("address")
+    private String address;
 
     @TableField("phone")
     private String phone;
 
-    @TableField("role")
-    private String role;
-
-    @TableField("community_id")
-    private Long communityId;
-
-    @TableField("elderly_id")
-    private Long elderlyId;
+    @TableField("manager_name")
+    private String managerName;
 
     @TableField("status")
     private String status;

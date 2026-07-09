@@ -1,5 +1,6 @@
 package com.elderlycare.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,11 +10,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
+public class UserBindRequest {
 
-    private String token;
-    private Long userId;
-    private String role;
-    private String realName;
+    @NotNull(message = "老人ID不能为空")
     private Long elderlyId;
 }

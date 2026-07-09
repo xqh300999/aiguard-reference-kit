@@ -15,35 +15,35 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("user")
-public class User {
+@TableName("device")
+public class Device {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @TableField("username")
-    private String username;
+    @TableField("name")
+    private String name;
 
-    @TableField("password")
-    private String password;
+    @TableField("type")
+    private String type;
 
-    @TableField("real_name")
-    private String realName;
-
-    @TableField("phone")
-    private String phone;
-
-    @TableField("role")
-    private String role;
-
-    @TableField("community_id")
-    private Long communityId;
+    @TableField("mac")
+    private String mac;
 
     @TableField("elderly_id")
     private Long elderlyId;
 
+    @TableField("community_id")
+    private Long communityId;
+
     @TableField("status")
     private String status;
+
+    @TableField("last_heartbeat")
+    private LocalDateTime lastHeartbeat;
+
+    @TableField("battery")
+    private Integer battery;
 
     @TableField("created_at")
     private LocalDateTime createdAt;

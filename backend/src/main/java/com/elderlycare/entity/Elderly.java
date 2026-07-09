@@ -9,38 +9,48 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("user")
-public class User {
+@TableName("elderly")
+public class Elderly {
 
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    @TableField("username")
-    private String username;
+    @TableField("name")
+    private String name;
 
-    @TableField("password")
-    private String password;
+    @TableField("gender")
+    private String gender;
 
-    @TableField("real_name")
-    private String realName;
+    @TableField("birth_date")
+    private LocalDate birthDate;
 
     @TableField("phone")
     private String phone;
 
-    @TableField("role")
-    private String role;
+    @TableField("address")
+    private String address;
 
     @TableField("community_id")
     private Long communityId;
 
-    @TableField("elderly_id")
-    private Long elderlyId;
+    @TableField("emergency_contact")
+    private String emergencyContact;
+
+    @TableField("emergency_phone")
+    private String emergencyPhone;
+
+    @TableField("health_status")
+    private String healthStatus;
+
+    @TableField("room_number")
+    private String roomNumber;
 
     @TableField("status")
     private String status;

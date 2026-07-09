@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -58,8 +59,20 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/v1/auth/login").permitAll()
+                .requestMatchers("/api/v1/auth/register").permitAll()
+                .requestMatchers("/api/web/v1/auth/register").permitAll()
                 .requestMatchers("/health").permitAll()
+                .requestMatchers("/favicon.ico").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/v1/users/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/v1/community/**").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/v1/elderly/register").hasAnyAuthority("ADMIN", "WORKER", "FAMILY")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/elderly").hasAnyAuthority("ADMIN", "WORKER", "FAMILY")
+                .requestMatchers(HttpMethod.PUT, "/api/v1/elderly/update-by-contact").hasAnyAuthority("ADMIN", "WORKER", "FAMILY")
+                .requestMatchers(HttpMethod.DELETE, "/api/v1/elderly/**").hasAnyAuthority("ADMIN", "WORKER", "FAMILY")
+                .requestMatchers("/api/v1/elderly/**").hasAnyAuthority("ADMIN", "WORKER")
+                .requestMatchers("/api/v1/devices/**").hasAnyAuthority("ADMIN", "WORKER")
                 .requestMatchers("/api/v1/worker/**").hasAnyAuthority("ADMIN", "WORKER")
                 .requestMatchers("/api/v1/family/**").hasAnyAuthority("ADMIN", "WORKER", "FAMILY")
                 .anyRequest().authenticated()
@@ -69,7 +82,7 @@ public class SecurityConfig {
                     response.setContentType("application/json;charset=UTF-8");
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     PrintWriter writer = response.getWriter();
-                    writer.write(objectMapper.writeValueAsString(Result.error("未授权，请先登录")));
+                    writer.write(objectMapper.writeValueAsString(Result.error(401, "未授权，请先登录")));
                     writer.flush();
                     writer.close();
                 })
@@ -77,7 +90,7 @@ public class SecurityConfig {
                     response.setContentType("application/json;charset=UTF-8");
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                     PrintWriter writer = response.getWriter();
-                    writer.write(objectMapper.writeValueAsString(Result.error("权限不足，无法访问")));
+                    writer.write(objectMapper.writeValueAsString(Result.error(403, "权限不足，无法访问")));
                     writer.flush();
                     writer.close();
                 })
