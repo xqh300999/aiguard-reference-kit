@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,32 +24,33 @@ public class Elderly {
     @TableField("name")
     private String name;
 
+    /** 年龄（schema.sql 用 age INT，非 birth_date） */
+    @TableField("age")
+    private Integer age;
+
     @TableField("gender")
     private String gender;
-
-    @TableField("birth_date")
-    private LocalDate birthDate;
-
-    @TableField("phone")
-    private String phone;
 
     @TableField("address")
     private String address;
 
-    @TableField("community_id")
-    private Long communityId;
+    @TableField("phone")
+    private String phone;
 
+    /** 紧急联系人电话（schema.sql 字段为 emergency_contact） */
     @TableField("emergency_contact")
     private String emergencyContact;
 
-    @TableField("emergency_phone")
-    private String emergencyPhone;
+    /** 健康备注（schema.sql 字段为 health_notes） */
+    @TableField("health_notes")
+    private String healthNotes;
 
-    @TableField("health_status")
-    private String healthStatus;
+    @TableField("community_id")
+    private Long communityId;
 
-    @TableField("room_number")
-    private String roomNumber;
+    /** 绑定设备 MAC（schema.sql 字段为 device_mac） */
+    @TableField("device_mac")
+    private String deviceMac;
 
     @TableField("status")
     private String status;

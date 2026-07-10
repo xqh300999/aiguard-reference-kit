@@ -9,6 +9,7 @@ import com.elderlycare.entity.Community;
 import com.elderlycare.entity.Device;
 import com.elderlycare.entity.Elderly;
 import com.elderlycare.exception.BusinessException;
+import com.elderlycare.mapper.AlertMapper;
 import com.elderlycare.mapper.CommunityMapper;
 import com.elderlycare.mapper.DeviceMapper;
 import com.elderlycare.mapper.ElderlyMapper;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +29,7 @@ public class ElderlyServiceImpl implements ElderlyService {
     private final ElderlyMapper elderlyMapper;
     private final CommunityMapper communityMapper;
     private final DeviceMapper deviceMapper;
+    private final AlertMapper alertMapper;
 
     @Override
     @Transactional
@@ -43,16 +44,14 @@ public class ElderlyServiceImpl implements ElderlyService {
 
         Elderly elderly = Elderly.builder()
                 .name(request.getName())
+                .age(request.getAge())
                 .gender(request.getGender())
-                .birthDate(calculateBirthDate(request.getAge(), request.getBirthDate()))
                 .phone(request.getPhone())
                 .address(request.getAddress())
                 .communityId(request.getCommunityId())
                 .emergencyContact(request.getEmergencyContact())
-                .emergencyPhone(request.getEmergencyPhone())
-                .healthStatus(request.getHealthNotes())
-                .roomNumber(request.getRoomNumber())
-                .status("NORMAL")
+                .healthNotes(request.getHealthNotes())
+                .status(request.getStatus() == null ? "ACTIVE" : request.getStatus())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -77,17 +76,14 @@ public class ElderlyServiceImpl implements ElderlyService {
         }
 
         if (request.getName() != null) elderly.setName(request.getName());
+        if (request.getAge() != null) elderly.setAge(request.getAge());
         if (request.getGender() != null) elderly.setGender(request.getGender());
-        if (request.getAge() != null || request.getBirthDate() != null) {
-            elderly.setBirthDate(calculateBirthDate(request.getAge(), request.getBirthDate()));
-        }
         if (request.getPhone() != null) elderly.setPhone(request.getPhone());
         if (request.getAddress() != null) elderly.setAddress(request.getAddress());
         if (request.getCommunityId() != null) elderly.setCommunityId(request.getCommunityId());
         if (request.getEmergencyContact() != null) elderly.setEmergencyContact(request.getEmergencyContact());
-        if (request.getEmergencyPhone() != null) elderly.setEmergencyPhone(request.getEmergencyPhone());
-        if (request.getHealthNotes() != null) elderly.setHealthStatus(request.getHealthNotes());
-        if (request.getRoomNumber() != null) elderly.setRoomNumber(request.getRoomNumber());
+        if (request.getHealthNotes() != null) elderly.setHealthNotes(request.getHealthNotes());
+        if (request.getStatus() != null) elderly.setStatus(request.getStatus());
         elderly.setUpdatedAt(LocalDateTime.now());
         elderlyMapper.updateById(elderly);
         return buildResponse(elderlyMapper.selectById(request.getId()));
@@ -100,9 +96,7 @@ public class ElderlyServiceImpl implements ElderlyService {
         if (elderly == null) {
             throw new BusinessException("老人信息不存在");
         }
-
         deviceMapper.unbindByElderlyId(id);
-
         elderlyMapper.deleteById(id);
     }
 
@@ -165,17 +159,14 @@ public class ElderlyServiceImpl implements ElderlyService {
         }
 
         if (request.getName() != null) elderly.setName(request.getName());
+        if (request.getAge() != null) elderly.setAge(request.getAge());
         if (request.getGender() != null) elderly.setGender(request.getGender());
-        if (request.getAge() != null || request.getBirthDate() != null) {
-            elderly.setBirthDate(calculateBirthDate(request.getAge(), request.getBirthDate()));
-        }
         if (request.getPhone() != null) elderly.setPhone(request.getPhone());
         if (request.getAddress() != null) elderly.setAddress(request.getAddress());
         if (request.getCommunityId() != null) elderly.setCommunityId(request.getCommunityId());
         if (request.getEmergencyContact() != null) elderly.setEmergencyContact(request.getEmergencyContact());
-        if (request.getEmergencyPhone() != null) elderly.setEmergencyPhone(request.getEmergencyPhone());
-        if (request.getHealthNotes() != null) elderly.setHealthStatus(request.getHealthNotes());
-        if (request.getRoomNumber() != null) elderly.setRoomNumber(request.getRoomNumber());
+        if (request.getHealthNotes() != null) elderly.setHealthNotes(request.getHealthNotes());
+        if (request.getStatus() != null) elderly.setStatus(request.getStatus());
         elderly.setUpdatedAt(LocalDateTime.now());
         elderlyMapper.updateById(elderly);
         return buildResponse(elderlyMapper.selectById(elderly.getId()));
@@ -188,20 +179,8 @@ public class ElderlyServiceImpl implements ElderlyService {
         }
     }
 
-    private LocalDate calculateBirthDate(Integer age, LocalDate birthDate) {
-        if (birthDate != null) {
-            return birthDate;
-        }
-        if (age != null) {
-            return LocalDate.now().minusYears(age);
-        }
-        return null;
-    }
-
     private ElderlyResponse buildResponse(Elderly elderly) {
         ElderlyResponse response = ElderlyResponse.fromEntity(elderly);
-
-        response.setAge(calculateAge(elderly.getBirthDate()));
 
         if (elderly.getCommunityId() != null) {
             Community community = communityMapper.findById(elderly.getCommunityId());
@@ -212,8 +191,9 @@ public class ElderlyServiceImpl implements ElderlyService {
 
         LambdaQueryWrapper<Device> deviceWrapper = new LambdaQueryWrapper<>();
         deviceWrapper.eq(Device::getElderlyId, elderly.getId());
-        Device device = deviceMapper.selectOne(deviceWrapper);
-        if (device != null) {
+        List<Device> devices = deviceMapper.selectList(deviceWrapper);
+        if (devices != null && !devices.isEmpty()) {
+            Device device = devices.get(0);
             response.setDevice(ElderlyResponse.DeviceInfo.builder()
                     .id(device.getId())
                     .name(device.getName())
@@ -224,13 +204,18 @@ public class ElderlyServiceImpl implements ElderlyService {
                     .build());
         }
 
-        return response;
-    }
+        Long recentCount = alertMapper.selectCount(
+                new LambdaQueryWrapper<com.elderlycare.entity.Alert>()
+                        .eq(com.elderlycare.entity.Alert::getElderlyId, elderly.getId())
+                        .ge(com.elderlycare.entity.Alert::getHappenedAt, LocalDateTime.now().minusDays(7)));
+        response.setRecentAlertCount(recentCount.intValue());
+        response.setHealthStatus(recentCount > 0 ? "需关注" : "良好");
+        Long todayCount = alertMapper.selectCount(
+                new LambdaQueryWrapper<com.elderlycare.entity.Alert>()
+                        .eq(com.elderlycare.entity.Alert::getElderlyId, elderly.getId())
+                        .ge(com.elderlycare.entity.Alert::getHappenedAt, LocalDateTime.now().toLocalDate().atStartOfDay()));
+        response.setTodayStatus(todayCount > 0 ? "有告警" : "正常");
 
-    private Integer calculateAge(LocalDate birthDate) {
-        if (birthDate == null) {
-            return null;
-        }
-        return (int) java.time.temporal.ChronoUnit.YEARS.between(birthDate, LocalDate.now());
+        return response;
     }
 }

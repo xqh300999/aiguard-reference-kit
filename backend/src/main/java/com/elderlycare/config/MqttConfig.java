@@ -3,8 +3,11 @@ package com.elderlycare.config;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.elderlycare.mapper.AlertMapper;
 import com.elderlycare.mapper.DeviceMapper;
+import com.elderlycare.mapper.ElderlyMapper;
 import com.elderlycare.entity.Alert;
 import com.elderlycare.entity.Device;
+import com.elderlycare.entity.Elderly;
+import com.elderlycare.websocket.AlertWebSocketHandler;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -26,6 +29,8 @@ import org.springframework.messaging.MessageHandler;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * MQTT 消费配置 — Spring Integration
@@ -49,6 +54,12 @@ public class MqttConfig {
 
     @Autowired
     private AlertMapper alertMapper;
+
+    @Autowired
+    private ElderlyMapper elderlyMapper;
+
+    @Autowired
+    private AlertWebSocketHandler alertWebSocketHandler;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -212,6 +223,9 @@ public class MqttConfig {
                 }
                 alertMapper.insert(alert);
 
+                // WebSocket 实时推送 NEW_ALERT
+                broadcastAlert("NEW_ALERT", alert, device.getElderlyId(), device.getCommunityId());
+
                 log.warn("[MQTT-SOS] 告警已入库 | alertId={} | elderlyId={} | deviceId={}",
                         alert.getId(), device.getElderlyId(), device.getId());
             } catch (Exception e) {
@@ -318,6 +332,35 @@ public class MqttConfig {
     }
 
     // ======================== 工具方法 ========================
+
+    /**
+     * 构建并广播告警 WebSocket 消息（对应文档 §13 推送格式）
+     */
+    private void broadcastAlert(String msgType, Alert alert, Long elderlyId, Long communityId) {
+        try {
+            String elderlyName = null;
+            if (elderlyId != null) {
+                Elderly elderly = elderlyMapper.selectById(elderlyId);
+                if (elderly != null) {
+                    elderlyName = elderly.getName();
+                }
+            }
+            Map<String, Object> data = new LinkedHashMap<>();
+            data.put("alertId", alert.getId());
+            data.put("type", alert.getType());
+            data.put("elderlyName", elderlyName);
+            data.put("communityId", communityId);
+            data.put("happenedAt", alert.getHappenedAt());
+
+            Map<String, Object> message = new LinkedHashMap<>();
+            message.put("type", msgType);
+            message.put("data", data);
+
+            alertWebSocketHandler.broadcast(objectMapper.writeValueAsString(message));
+        } catch (Exception e) {
+            log.warn("[WS] 广播告警消息失败", e);
+        }
+    }
 
     /**
      * 将无分隔符的 MAC 转为带冒号格式

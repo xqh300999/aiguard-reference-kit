@@ -1,6 +1,7 @@
 package com.elderlycare.service;
 
 import com.elderlycare.common.PageResult;
+import com.elderlycare.dto.AlertCreateDTO;
 import com.elderlycare.dto.AlertDTO;
 import com.elderlycare.dto.AlertUpdateDTO;
 
@@ -10,9 +11,14 @@ import com.elderlycare.dto.AlertUpdateDTO;
 public interface AlertService {
 
     /**
+     * 6.1 创建告警
+     */
+    AlertDTO create(AlertCreateDTO dto);
+
+    /**
      * 告警列表（分页 + 筛选）
      */
-    PageResult<AlertDTO> list(Long communityId, String status, String type, int page, int size);
+    PageResult<AlertDTO> list(Long elderlyId, Long communityId, String status, String type, int page, int size);
 
     /**
      * 告警详情

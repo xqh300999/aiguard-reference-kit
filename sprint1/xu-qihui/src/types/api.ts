@@ -110,6 +110,8 @@ export interface CreateDispatchPayload {
 export interface UpdateDispatchPayload {
   description: string
   result: DispatchResult
+  cause?: string
+  details?: string
 }
 
 export interface Community {

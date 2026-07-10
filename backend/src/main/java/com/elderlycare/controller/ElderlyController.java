@@ -1,9 +1,12 @@
 package com.elderlycare.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.elderlycare.common.PageResult;
 import com.elderlycare.common.Result;
+import com.elderlycare.dto.AlertDTO;
 import com.elderlycare.dto.ElderlyRequest;
 import com.elderlycare.dto.ElderlyResponse;
+import com.elderlycare.service.AlertService;
 import com.elderlycare.service.ElderlyService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ import java.util.List;
 public class ElderlyController {
 
     private final ElderlyService elderlyService;
+    private final AlertService alertService;
 
     @GetMapping
     public ResponseEntity<Result<IPage<ElderlyResponse>>> list(
@@ -33,6 +37,14 @@ public class ElderlyController {
     @GetMapping("/{id}")
     public ResponseEntity<Result<ElderlyResponse>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(Result.success(elderlyService.findById(id)));
+    }
+
+    @GetMapping("/{id}/alerts")
+    public ResponseEntity<Result<PageResult<AlertDTO>>> alertsByElderly(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return ResponseEntity.ok(Result.success(alertService.list(id, null, null, null, page, size)));
     }
 
     @PostMapping

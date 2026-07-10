@@ -2,6 +2,7 @@ package com.elderlycare.dto;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -25,7 +26,11 @@ public class AlertDTO {
     private String handlerName;
     private String cause;
     private String details;
+    private BigDecimal lat;
+    private BigDecimal lng;
     private LocalDateTime happenedAt;
     private LocalDateTime resolvedAt;
     private LocalDateTime createdAt;
+    private Long notificationId;
+    private DispatchDTO dispatch;
 }

@@ -4,7 +4,7 @@ import { Elderly, ElderlyForm, ElderlySearchItem } from '../models/Elderly';
 import { Result } from '../models/Result';
 import { BindByContactRequest, RegisterFamilyRequest, User, UserAccount } from '../models/User';
 
-const MOCK_TS: string = '2026-07-05T10:00:00Z';
+const MOCK_RESULT_TS: number = 0;
 const SOS_TS: string = '2026-07-05T10:30:00Z';
 
 export interface FamilyHomeData {
@@ -168,7 +168,7 @@ export class MockService {
         code: 400,
         message: '请输入账号和密码',
         data: null,
-        ts: MOCK_TS
+        ts: MOCK_RESULT_TS
       };
     }
 
@@ -185,7 +185,7 @@ export class MockService {
           communityId: 1,
           communityName: '幸福社区'
         },
-        ts: MOCK_TS
+        ts: MOCK_RESULT_TS
       };
     }
 
@@ -202,7 +202,7 @@ export class MockService {
         communityId: 1,
         communityName: '幸福社区'
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -219,7 +219,7 @@ export class MockService {
         communityId: request.communityId,
         status: 'ENABLED'
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -229,7 +229,7 @@ export class MockService {
         code: 400,
         message: '未找到匹配的老人，请检查姓名和电话',
         data: null,
-        ts: MOCK_TS
+        ts: MOCK_RESULT_TS
       };
     }
     return {
@@ -244,7 +244,7 @@ export class MockService {
         elderlyId: 1,
         status: 'ENABLED'
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -259,7 +259,7 @@ export class MockService {
         latestAlert: alerts[1],
         unreadCount: 0
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -268,7 +268,7 @@ export class MockService {
       code: 0,
       message: '收到新的 SOS 告警',
       data: MockService.buildSosAlert(),
-      ts: SOS_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -283,7 +283,7 @@ export class MockService {
         page: 1,
         size: 20
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -294,7 +294,7 @@ export class MockService {
       data: {
         unreadCount: 0
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -305,7 +305,7 @@ export class MockService {
       data: {
         unreadCount: 0
       },
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -317,7 +317,7 @@ export class MockService {
           code: 0,
           message: 'success',
           data: records[index],
-          ts: MOCK_TS
+          ts: MOCK_RESULT_TS
         };
       }
     }
@@ -326,7 +326,7 @@ export class MockService {
       code: 404,
       message: '告警不存在',
       data: null,
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -335,7 +335,7 @@ export class MockService {
       code: 0,
       message: 'success',
       data: MockService.buildElderly(),
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -360,7 +360,7 @@ export class MockService {
       code: 0,
       message: 'success',
       data: elderly,
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -369,7 +369,7 @@ export class MockService {
       code: request.id === undefined ? 400 : 0,
       message: request.id === undefined ? '缺少老人 ID' : 'success',
       data: null,
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 
@@ -379,7 +379,7 @@ export class MockService {
         code: 400,
         message: '未找到匹配的老人，请检查姓名和电话',
         data: null,
-        ts: MOCK_TS
+        ts: MOCK_RESULT_TS
       };
     }
     return MockService.mockRegisterElderly(request);
@@ -401,7 +401,7 @@ export class MockService {
       code: 0,
       message: 'success',
       data: records,
-      ts: MOCK_TS
+      ts: MOCK_RESULT_TS
     };
   }
 }
