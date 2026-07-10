@@ -5,6 +5,10 @@ spring:
   profiles:
     active: local
 
+  sql:
+    init:
+      mode: never
+
   datasource:
     url: jdbc:mysql://localhost:3306/aiguard?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME:root}
