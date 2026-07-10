@@ -50,6 +50,9 @@ export class AlertPushService {
       if (result.code !== 0 || result.data === null) {
         return;
       }
+      if (!AlertPushService.isCurrentElderlyAlert(result.data.elderlyId)) {
+        return;
+      }
 
       let unreadCount = AppStorage.get<number>(StorageKeys.UNREAD_ALERT_COUNT) ?? 0;
       AppStorage.setOrCreate<boolean>(StorageKeys.HAS_NEW_SOS_ALERT, true);
@@ -124,6 +127,10 @@ export class AlertPushService {
       let message: WsMessage = JSON.parse(data) as WsMessage;
       if (message.type === 'NEW_ALERT') {
         let alertData = message.data;
+        if (!AlertPushService.isCurrentElderlyAlert(alertData.elderlyId)) {
+          console.info('[WebSocket] ignore alert for unbound elderly: ' + JSON.stringify(alertData));
+          return;
+        }
         let alert: Alert = {
           id: alertData.alertId,
           type: alertData.type,
@@ -147,6 +154,14 @@ export class AlertPushService {
     } catch (error) {
       console.error('[WebSocket] 消息解析失败: ' + JSON.stringify(error));
     }
+  }
+
+  private static isCurrentElderlyAlert(alertElderlyId?: number): boolean {
+    let currentElderlyId = AppStorage.get<number>(StorageKeys.ELDERLY_ID) ?? 0;
+    if (currentElderlyId <= 0 || alertElderlyId === undefined || alertElderlyId <= 0) {
+      return false;
+    }
+    return alertElderlyId === currentElderlyId;
   }
 
   private static disconnectWebSocket(): void {
