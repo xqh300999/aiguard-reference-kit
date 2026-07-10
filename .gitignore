@@ -22,6 +22,22 @@ Desktop.ini
 # Logs
 *.log
 
+# Java / Maven 编译产物
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven 临时文件
+.mvn/
+mvnw
+mvnw.cmd
+
+# 测试报告
+surefire-reports/
+failsafe-reports/
+
 # 固件二进制文件不纳入Git版本控制，通过Gitee Release分发
 06-firmware/xiaozhi/*.zip
 06-firmware/xiaozhi/*.bin
