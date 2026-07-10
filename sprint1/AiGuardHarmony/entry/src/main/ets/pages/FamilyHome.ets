@@ -92,6 +92,9 @@ struct FamilyHome {
   }
 
   private handleReceivedSosAlert(alert: Alert): void {
+    if (alert.elderlyId !== this.elderlyId) {
+      return;
+    }
     this.latestAlert = alert;
     this.unreadAlertCount = AppStorage.get<number>(StorageKeys.UNREAD_ALERT_COUNT) ?? this.unreadAlertCount + 1;
     this.pushTip = `${alert.elderlyName} 触发紧急求助`;
