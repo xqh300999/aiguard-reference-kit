@@ -1,10 +1,10 @@
 package com.elderlycare.service.impl;
 
 import com.elderlycare.mapper.StatsMapper;
-import com.elderlycare.model.dto.StatsAlertTrendDTO;
-import com.elderlycare.model.dto.StatsCareDTO;
-import com.elderlycare.model.dto.StatsOverviewDTO;
-import com.elderlycare.model.dto.TrendRow;
+import com.elderlycare.dto.StatsAlertTrendDTO;
+import com.elderlycare.dto.StatsCareDTO;
+import com.elderlycare.dto.StatsOverviewDTO;
+import com.elderlycare.dto.TrendRow;
 import com.elderlycare.service.StatsService;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;

@@ -1,8 +1,8 @@
 package com.elderlycare.service;
 
 import com.elderlycare.common.PageResult;
-import com.elderlycare.model.dto.AlertDTO;
-import com.elderlycare.model.dto.AlertUpdateDTO;
+import com.elderlycare.dto.AlertDTO;
+import com.elderlycare.dto.AlertUpdateDTO;
 
 /**
  * 告警 Service

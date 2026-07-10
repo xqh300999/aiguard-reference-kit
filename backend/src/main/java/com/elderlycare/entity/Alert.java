@@ -1,4 +1,4 @@
-package com.elderlycare.model.entity;
+package com.elderlycare.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

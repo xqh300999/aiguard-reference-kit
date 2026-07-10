@@ -1,9 +1,9 @@
 package com.elderlycare.controller;
 
 import com.elderlycare.common.Result;
-import com.elderlycare.model.dto.StatsAlertTrendDTO;
-import com.elderlycare.model.dto.StatsCareDTO;
-import com.elderlycare.model.dto.StatsOverviewDTO;
+import com.elderlycare.dto.StatsAlertTrendDTO;
+import com.elderlycare.dto.StatsCareDTO;
+import com.elderlycare.dto.StatsOverviewDTO;
 import com.elderlycare.service.StatsService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

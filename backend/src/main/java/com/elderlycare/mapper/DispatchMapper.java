@@ -2,8 +2,8 @@ package com.elderlycare.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.elderlycare.model.dto.DispatchDTO;
-import com.elderlycare.model.entity.Dispatch;
+import com.elderlycare.dto.DispatchDTO;
+import com.elderlycare.entity.Dispatch;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

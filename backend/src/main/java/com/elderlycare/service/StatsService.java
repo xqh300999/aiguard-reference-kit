@@ -1,8 +1,8 @@
 package com.elderlycare.service;
 
-import com.elderlycare.model.dto.StatsAlertTrendDTO;
-import com.elderlycare.model.dto.StatsCareDTO;
-import com.elderlycare.model.dto.StatsOverviewDTO;
+import com.elderlycare.dto.StatsAlertTrendDTO;
+import com.elderlycare.dto.StatsCareDTO;
+import com.elderlycare.dto.StatsOverviewDTO;
 
 import java.io.IOException;
 import java.io.OutputStream;
