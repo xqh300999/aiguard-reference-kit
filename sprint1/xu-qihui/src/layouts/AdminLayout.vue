@@ -58,6 +58,17 @@
             <ShieldCheck :size="14" />
             {{ authStore.user?.role || 'ADMIN' }}
           </el-tag>
+          <el-dropdown trigger="click" @command="handleAlertCommand">
+            <button class="alert-notification-btn" type="button">
+              <Bell :size="18" />
+              <span v-if="alertStore.unreadCount > 0" class="alert-badge">{{ alertStore.unreadCount }}</span>
+            </button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <AlertList />
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <el-dropdown trigger="click" @command="handleCommand">
             <button class="user-chip" type="button">
               <span>{{ nameInitial }}</span>
@@ -79,17 +90,23 @@
         <RouterView />
       </main>
     </section>
+
+    <AlertNotification />
   </div>
 </template>
 
 <script setup lang="ts">
-import { LayoutDashboard, Building2, Users, UserCircle, MonitorSmartphone, AlertTriangle, ShieldCheck, LogOut, Home, Menu } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
+import { LayoutDashboard, Building2, Users, UserCircle, MonitorSmartphone, AlertTriangle, ShieldCheck, LogOut, Home, Menu, Bell } from 'lucide-vue-next'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
+import { useAlertStore } from '@/stores/alert'
+import AlertNotification from '@/components/AlertNotification.vue'
+import AlertList from '@/components/AlertList.vue'
 
 const authStore = useAuthStore()
+const alertStore = useAlertStore()
 const route = useRoute()
 const router = useRouter()
 const collapsed = ref(false)
@@ -111,9 +128,63 @@ const nameInitial = computed(() => (authStore.user?.realName || '管').slice(0, 
 
 const handleCommand = (command: string) => {
   if (command === 'logout') {
+    alertStore.closeWebSocket()
     authStore.logout()
     ElMessage.success('退出成功')
     router.push('/login')
   }
 }
+
+const handleAlertCommand = (command: string) => {
+  if (command === 'clear') {
+    alertStore.clearAll()
+  }
+}
+
+onMounted(() => {
+  alertStore.initWebSocket()
+})
+
+onUnmounted(() => {
+  alertStore.closeWebSocket()
+})
 </script>
+
+<style scoped>
+.alert-notification-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+  position: relative;
+  margin-right: 8px;
+  transition: all 0.2s;
+}
+
+.alert-notification-btn:hover {
+  background: #e5e7eb;
+}
+
+.alert-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  background: #ef4444;
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+</style>

@@ -67,17 +67,19 @@
 
 <script setup lang="ts">
 import { RefreshCw } from 'lucide-vue-next'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { getAlerts } from '@/api/alerts'
 import type { AlertRecord, AlertStatus } from '@/types/api'
 import { alertStatusTag, alertTypeTone, formatDateTime, priorityText } from '@/utils/labels'
+import { useAlertStore } from '@/stores/alert'
 
 type StatusTab = AlertStatus | 'ALL'
 
 const route = useRoute()
 const router = useRouter()
+const alertStore = useAlertStore()
 const loading = ref(false)
 const activeStatus = ref<StatusTab>('PENDING')
 const records = ref<AlertRecord[]>([])
@@ -107,4 +109,8 @@ function goDetail(id: number) {
 }
 
 onMounted(loadAlerts)
+
+watch(() => alertStore.notifications.length, () => {
+  loadAlerts()
+})
 </script>

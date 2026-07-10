@@ -81,11 +81,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getAlerts, updateAlert, getCommunities } from '@/api'
 import type { AlertRecord as Alert, Community } from '@/types/api'
+import { useAlertStore } from '@/stores/alert'
 
+const alertStore = useAlertStore()
 const tableData = ref<Alert[]>([])
 const communities = ref<Community[]>([])
 const total = ref(0)
@@ -208,6 +210,10 @@ const handleCurrentChange = (val: number) => {
 
 onMounted(() => {
   fetchCommunities()
+  fetchData()
+})
+
+watch(() => alertStore.notifications.length, () => {
   fetchData()
 })
 </script>
