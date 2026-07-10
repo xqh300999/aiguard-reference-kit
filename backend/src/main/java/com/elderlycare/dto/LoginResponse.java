@@ -16,4 +16,7 @@ public class LoginResponse {
     private String role;
     private String realName;
     private Long elderlyId;
+    private String elderlyName;
+    private Long communityId;
+    private String communityName;
 }

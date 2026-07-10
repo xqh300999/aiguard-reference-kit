@@ -105,6 +105,9 @@ public class DispatchServiceImpl implements DispatchService {
         if (dto.getStatus() != null) {
             dispatch.setStatus(dto.getStatus());
         }
+        if (dto.getResult() != null && !"COMPLETED".equals(dispatch.getStatus())) {
+            dispatch.setStatus("COMPLETED");
+        }
         dispatchMapper.updateById(dispatch);
 
         // 双表同步：更新 alert
@@ -116,8 +119,7 @@ public class DispatchServiceImpl implements DispatchService {
         if (dto.getDetails() != null) {
             alertUpdate.setDetails(dto.getDetails());
         }
-        // 派工完成 → 告警同步为 RESOLVED
-        if ("COMPLETED".equals(dto.getStatus())) {
+        if ("COMPLETED".equals(dispatch.getStatus())) {
             alertUpdate.setStatus("RESOLVED");
             alertUpdate.setResolvedAt(LocalDateTime.now());
         }

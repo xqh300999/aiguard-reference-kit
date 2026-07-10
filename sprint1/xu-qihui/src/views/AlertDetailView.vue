@@ -130,6 +130,12 @@
             <el-option label="需跟进" value="NEED_FOLLOW_UP" />
           </el-select>
         </el-form-item>
+        <el-form-item label="原因">
+          <el-input
+            v-model.trim="processForm.cause"
+            placeholder="请填写原因（如：误触SOS按钮、卫生间滑倒等）"
+          />
+        </el-form-item>
         <el-form-item label="描述">
           <el-input
             v-model.trim="processForm.description"
@@ -155,6 +161,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { createDispatch, getAlertDetail, getDispatchByAlert, updateAlert, updateDispatch } from '@/api/alerts'
+import { getElderlyDetail } from '@/api/elderlies'
 import { useAuthStore } from '@/stores/auth'
 import type { AlertDetail as AlertDetailType, DispatchResult, ElderlySummary } from '@/types/api'
 import {
@@ -172,9 +179,10 @@ const loading = ref(false)
 const actionLoading = ref(false)
 const processVisible = ref(false)
 const alert = ref<AlertDetailType | null>(null)
-const fallbackElderly = ref<ElderlySummary | null>(null)
+const elderlyDetail = ref<ElderlySummary | null>(null)
 const processForm = reactive({
   result: 'RESOLVED' as DispatchResult,
+  cause: '',
   description: '',
 })
 
@@ -192,7 +200,41 @@ const emptyElderly: ElderlySummary = {
   battery: 0,
 }
 
-const displayElderly = computed(() => alert.value?.elderly ?? fallbackElderly.value ?? emptyElderly)
+const displayElderly = computed(() => elderlyDetail.value ?? alert.value?.elderly ?? emptyElderly)
+
+function toGenderName(gender?: string) {
+  if (!gender) return '-'
+  if (gender === 'MALE') return '男'
+  if (gender === 'FEMALE') return '女'
+  return gender
+}
+
+function toElderlySummary(data: any): ElderlySummary {
+  return {
+    id: data?.id ?? 0,
+    name: data?.name ?? '-',
+    age: data?.age ?? 0,
+    gender: data?.gender ?? 'MALE',
+    genderName: toGenderName(data?.gender),
+    address: data?.address ?? '-',
+    phone: data?.phone ?? '-',
+    emergencyContact: data?.emergencyContact ?? '-',
+    healthNotes: data?.healthNotes ?? '-',
+    deviceStatus: data?.device?.status ?? 'OFFLINE',
+    battery: data?.device?.battery ?? 0,
+  }
+}
+
+async function fetchElderlyFallback(elderlyId?: number | null) {
+  elderlyDetail.value = null
+  if (!elderlyId) return
+  try {
+    const res = await getElderlyDetail(elderlyId)
+    elderlyDetail.value = toElderlySummary(res)
+  } catch {
+    elderlyDetail.value = null
+  }
+}
 
 async function loadDetail() {
   loading.value = true
@@ -200,7 +242,7 @@ async function loadDetail() {
     const id = Number(route.params.id)
     const detail = await getAlertDetail(id)
     alert.value = detail
-    fallbackElderly.value = detail.elderly ?? null
+    await fetchElderlyFallback(detail?.elderlyId)
   } finally {
     loading.value = false
   }
@@ -244,7 +286,9 @@ async function submitProcess() {
     const dispatch = alert.value.dispatch ?? (await getDispatchByAlert(alert.value.id))
     await updateDispatch(dispatch.id, {
       result: processForm.result,
+      cause: processForm.cause,
       description: processForm.description,
+      details: processForm.description,
     })
     ElMessage.success('处理结果已提交')
     processVisible.value = false

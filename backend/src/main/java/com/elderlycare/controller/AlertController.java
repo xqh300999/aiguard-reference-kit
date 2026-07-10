@@ -2,6 +2,7 @@ package com.elderlycare.controller;
 
 import com.elderlycare.common.PageResult;
 import com.elderlycare.common.Result;
+import com.elderlycare.dto.AlertCreateDTO;
 import com.elderlycare.dto.AlertDTO;
 import com.elderlycare.dto.AlertUpdateDTO;
 import com.elderlycare.service.AlertService;
@@ -20,16 +21,25 @@ public class AlertController {
     private final AlertService alertService;
 
     /**
+     * 6.1 创建告警（从 App 或 MQTT 触发）
+     */
+    @PostMapping
+    public Result<AlertDTO> create(@RequestBody AlertCreateDTO dto) {
+        return Result.success(alertService.create(dto));
+    }
+
+    /**
      * 6.2 告警列表
      */
     @GetMapping
     public Result<PageResult<AlertDTO>> list(
+            @RequestParam(required = false) Long elderlyId,
             @RequestParam(required = false) Long communityId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
-        return Result.success(alertService.list(communityId, status, type, page, size));
+        return Result.success(alertService.list(elderlyId, communityId, status, type, page, size));
     }
 
     /**

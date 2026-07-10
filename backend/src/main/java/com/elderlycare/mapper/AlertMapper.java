@@ -22,13 +22,14 @@ public interface AlertMapper extends BaseMapper<Alert> {
             "a.community_id AS communityId, c.name AS communityName, " +
             "a.device_id AS deviceId, a.source, a.status, a.priority, " +
             "a.handler_id AS handlerId, u.real_name AS handlerName, " +
-            "a.cause, a.details, a.happened_at AS happenedAt, a.resolved_at AS resolvedAt, " +
+            "a.cause, a.details, a.lat, a.lng, a.happened_at AS happenedAt, a.resolved_at AS resolvedAt, " +
             "a.created_at AS createdAt " +
             "FROM alert a " +
             "LEFT JOIN elderly el ON a.elderly_id = el.id " +
             "LEFT JOIN community c ON a.community_id = c.id " +
             "LEFT JOIN user u ON a.handler_id = u.id " +
             "<where>" +
+            "  <if test='elderlyId != null'>AND a.elderly_id = #{elderlyId}</if>" +
             "  <if test='communityId != null'>AND a.community_id = #{communityId}</if>" +
             "  <if test='status != null and status != \"\"'>AND a.status = #{status}</if>" +
             "  <if test='type != null and type != \"\"'>AND a.type = #{type}</if>" +
@@ -36,6 +37,7 @@ public interface AlertMapper extends BaseMapper<Alert> {
             "ORDER BY a.happened_at DESC" +
             "</script>")
     IPage<AlertDTO> selectAlertPage(IPage<AlertDTO> page,
+                                    @Param("elderlyId") Long elderlyId,
                                     @Param("communityId") Long communityId,
                                     @Param("status") String status,
                                     @Param("type") String type);
@@ -47,7 +49,7 @@ public interface AlertMapper extends BaseMapper<Alert> {
             "a.community_id AS communityId, c.name AS communityName, " +
             "a.device_id AS deviceId, a.source, a.status, a.priority, " +
             "a.handler_id AS handlerId, u.real_name AS handlerName, " +
-            "a.cause, a.details, a.happened_at AS happenedAt, a.resolved_at AS resolvedAt, " +
+            "a.cause, a.details, a.lat, a.lng, a.happened_at AS happenedAt, a.resolved_at AS resolvedAt, " +
             "a.created_at AS createdAt " +
             "FROM alert a " +
             "LEFT JOIN elderly el ON a.elderly_id = el.id " +

@@ -21,3 +21,7 @@ export const updateElderly = (id: number, data: Partial<Omit<Elderly, 'id' | 'de
 export const deleteElderly = (id: number) => {
   return request.delete(`/elderly/${id}`)
 }
+
+export const getElderlyDetail = (id: number) => {
+  return request.get(`/elderly/${id}`)
+}

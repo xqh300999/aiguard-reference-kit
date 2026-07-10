@@ -2,12 +2,16 @@ package com.elderlycare.service;
 
 import com.elderlycare.dto.LoginRequest;
 import com.elderlycare.dto.LoginResponse;
+import com.elderlycare.dto.RefreshResponse;
 import com.elderlycare.dto.RegisterRequest;
 import com.elderlycare.dto.UserResponse;
+import io.jsonwebtoken.Claims;
 import com.elderlycare.entity.Community;
+import com.elderlycare.entity.Elderly;
 import com.elderlycare.entity.User;
 import com.elderlycare.exception.BusinessException;
 import com.elderlycare.mapper.CommunityMapper;
+import com.elderlycare.mapper.ElderlyMapper;
 import com.elderlycare.mapper.UserMapper;
 import com.elderlycare.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +24,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserMapper userMapper;
+    private final ElderlyMapper elderlyMapper;
     private final CommunityMapper communityMapper;
     private final JwtUtil jwtUtil;
     private final BCryptPasswordEncoder passwordEncoder;
+
+    /**
+     * 1.2 Token 刷新：解析当前有效 token，签发新 token
+     */
+    public RefreshResponse refresh(String token) {
+        Claims claims = jwtUtil.parseToken(token);
+        Long userId = claims.get("userId", Long.class);
+        String username = claims.getSubject();
+        String role = claims.get("role", String.class);
+        String realName = claims.get("realName", String.class);
+
+        String newToken = jwtUtil.generateToken(userId, username, role, realName);
+        return RefreshResponse.builder()
+                .token(newToken)
+                .expiresIn(86400)
+                .build();
+    }
 
     public LoginResponse login(LoginRequest request) {
         User user = userMapper.findByUsername(request.getUsername());
@@ -37,13 +59,28 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(user.getId(), user.getUsername(), user.getRole(), user.getRealName());
 
-        return LoginResponse.builder()
+        LoginResponse.LoginResponseBuilder builder = LoginResponse.builder()
                 .token(token)
                 .userId(user.getId())
                 .role(user.getRole())
                 .realName(user.getRealName())
                 .elderlyId(user.getElderlyId())
-                .build();
+                .communityId(user.getCommunityId());
+
+        if (user.getElderlyId() != null) {
+            Elderly elderly = elderlyMapper.selectById(user.getElderlyId());
+            if (elderly != null) {
+                builder.elderlyName(elderly.getName());
+            }
+        }
+        if (user.getCommunityId() != null) {
+            Community community = communityMapper.findById(user.getCommunityId());
+            if (community != null) {
+                builder.communityName(community.getName());
+            }
+        }
+
+        return builder.build();
     }
 
     @Transactional
@@ -80,7 +117,7 @@ public class AuthService {
                 .phone(request.getPhone())
                 .role(request.getRole())
                 .communityId(request.getCommunityId())
-                .status("ENABLED")
+                .status("ACTIVE")
                 .build();
         userMapper.insert(user);
         return UserResponse.fromEntity(userMapper.selectById(user.getId()));
