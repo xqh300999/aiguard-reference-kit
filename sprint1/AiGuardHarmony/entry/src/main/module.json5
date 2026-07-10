@@ -16,6 +16,7 @@
     "deliveryWithInstall": true,
     "installationFree": false,
     "pages": "$profile:main_pages",
+    "network": "$profile:network_config",
     "abilities": [
       {
         "name": "EntryAbility",
