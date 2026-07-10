@@ -106,7 +106,7 @@ export class ApiService {
         latestAlert: latestAlert,
         unreadCount: unreadCount
       },
-      ts: ''
+      ts: 0
     };
   }
 
@@ -226,7 +226,7 @@ export class ApiService {
       code: code,
       message: message,
       data: null,
-      ts: ''
+      ts: 0
     };
   }
 
