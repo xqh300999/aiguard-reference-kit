@@ -1,9 +1,9 @@
 package com.elderlycare.service;
 
 import com.elderlycare.common.PageResult;
-import com.elderlycare.model.dto.DispatchCreateDTO;
-import com.elderlycare.model.dto.DispatchDTO;
-import com.elderlycare.model.dto.DispatchUpdateDTO;
+import com.elderlycare.dto.DispatchCreateDTO;
+import com.elderlycare.dto.DispatchDTO;
+import com.elderlycare.dto.DispatchUpdateDTO;
 
 /**
  * 派工 Service

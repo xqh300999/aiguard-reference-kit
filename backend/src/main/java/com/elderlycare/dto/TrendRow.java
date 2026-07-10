@@ -1,4 +1,4 @@
-package com.elderlycare.model.dto;
+package com.elderlycare.dto;
 
 import lombok.Data;
 

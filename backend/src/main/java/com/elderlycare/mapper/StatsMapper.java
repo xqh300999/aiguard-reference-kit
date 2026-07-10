@@ -1,6 +1,6 @@
 package com.elderlycare.mapper;
 
-import com.elderlycare.model.dto.TrendRow;
+import com.elderlycare.dto.TrendRow;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

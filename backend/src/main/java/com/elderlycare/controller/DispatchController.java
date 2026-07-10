@@ -2,9 +2,9 @@ package com.elderlycare.controller;
 
 import com.elderlycare.common.PageResult;
 import com.elderlycare.common.Result;
-import com.elderlycare.model.dto.DispatchCreateDTO;
-import com.elderlycare.model.dto.DispatchDTO;
-import com.elderlycare.model.dto.DispatchUpdateDTO;
+import com.elderlycare.dto.DispatchCreateDTO;
+import com.elderlycare.dto.DispatchDTO;
+import com.elderlycare.dto.DispatchUpdateDTO;
 import com.elderlycare.service.DispatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

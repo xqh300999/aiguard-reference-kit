@@ -2,8 +2,8 @@ package com.elderlycare.controller;
 
 import com.elderlycare.common.PageResult;
 import com.elderlycare.common.Result;
-import com.elderlycare.model.dto.AlertDTO;
-import com.elderlycare.model.dto.AlertUpdateDTO;
+import com.elderlycare.dto.AlertDTO;
+import com.elderlycare.dto.AlertUpdateDTO;
 import com.elderlycare.service.AlertService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
