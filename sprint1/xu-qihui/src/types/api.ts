@@ -39,6 +39,7 @@ export interface UserSession {
   role: Role
   realName: string
   communityId?: number
+  communityName?: string
 }
 
 export interface AlertRecord {
