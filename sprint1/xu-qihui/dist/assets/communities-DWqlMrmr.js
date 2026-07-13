@@ -1,1 +1,0 @@
-import{h as e}from"./request-Dr9-9ifA.js";const o=()=>e.get("/communities"),s=t=>e.post("/communities",t),u=(t,m)=>e.put(`/communities/${t}`,m),i=t=>e.delete(`/communities/${t}`);export{s as c,i as d,o as g,u};

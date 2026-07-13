@@ -1,1 +1,0 @@
-import{h as e}from"./request-Dr9-9ifA.js";const a=t=>e.get("/alerts",{params:t}),l=t=>e.get(`/alerts/${t}`),o=t=>e.post(`/alerts/${t}/take`),n=(t,r)=>e.post(`/alerts/${t}/complete`,r),c=(t,r)=>e.patch(`/alerts/${t}`,r);export{l as a,n as c,a as g,o as t,c as u};

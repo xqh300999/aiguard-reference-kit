@@ -1,1 +1,0 @@
-import{h as r}from"./request-CwjD9pV1.js";const s=e=>r.get("/elderlies",{params:e}),d=e=>r.post("/elderlies",e),n=(e,t)=>r.put(`/elderlies/${e}`,t),o=e=>r.delete(`/elderlies/${e}`);export{d as c,o as d,s as g,n as u};
