@@ -1,8 +1,7 @@
 spring:
   sql:
     init:
-      mode: always
-      continue-on-error: true
+      mode: never
 
   datasource:
     url: jdbc:mysql://${MYSQLHOST:mysql.railway.internal}:${MYSQLPORT:3306}/${MYSQLDATABASE:railway}?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
